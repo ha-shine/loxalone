@@ -87,6 +87,22 @@ auto Scanner::scan_token() -> void {
       if (match('/')) {
         while (peek() != '\n' && !is_at_end())
           advance();
+      } else if (match('*')) {
+        bool done = false;
+        while (peek() != '\n' && !is_at_end() && !done) {
+          char now = advance();
+          if (now == '*' && peek() == '/') {
+            advance(); // consume "/"
+            done = true;
+          }
+        }
+
+        // done = comment was well-formed, scanning is done
+        // if done is false, we reached the end without closing the comment
+        if (done)
+          break;
+
+        error(line, "Unterminated block comment.");
       } else {
         add_token(SLASH);
       }
