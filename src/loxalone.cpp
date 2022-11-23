@@ -10,12 +10,14 @@ const auto USAGE = "Usage: loxalone [script]";
 // Probably should return result rather than boolean
 auto run(const std::string_view& source) -> bool {
   Scanner scanner{source};
-  std::vector tokens = scanner.scan_tokens();
+  std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
 
-  for (const auto& token : tokens) {
-    fmt::print("{} ", token);
+  if (tokens.has_value()) {
+    for (const auto& token : tokens.value()) {
+      fmt::print("{} ", token);
+    }
+    fmt::print("\n");
   }
-  fmt::print("\n");
   return true;
 }
 

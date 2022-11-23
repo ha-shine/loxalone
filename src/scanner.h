@@ -15,7 +15,7 @@ class Scanner {
  public:
   explicit Scanner(const std::string_view& source) : source{source}, tokens{} {}
 
-  auto scan_tokens() -> std::vector<Token>;
+  auto scan_tokens() -> std::optional<std::vector<Token>>;
 
  private:
   auto scan_token() -> void;
@@ -32,12 +32,15 @@ class Scanner {
   auto add_token(TokenType) -> void;
   auto add_token(TokenType, std::optional<lox_literal>&&) -> void;
 
+  auto error(int line, const std::string_view& msg) -> void;
+
   const std::string_view& source;
   std::vector<Token> tokens;
 
-  int start = 0;
-  int current = 0;
-  int line = 1;
+  int start_m = 0;
+  int current_m = 0;
+  int line_m = 1;
+  bool well_formed_m = true;
 };
 
 #endif  //LOXALONE_SCANNER_H
