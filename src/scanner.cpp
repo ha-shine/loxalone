@@ -3,12 +3,27 @@
 //
 
 #include <string>
+#include <unordered_map>
 
 #include "errors.h"
 #include "scanner.h"
 
+static std::unordered_map<std::string, TokenType> keywords{
+    {"and", AND},   {"class", CLASS}, {"else", ELSE},     {"false", FALSE},
+    {"for", FOR},   {"fun", FUN},     {"if", IF},         {"nil", NIL},
+    {"or", OR},     {"print", PRINT}, {"return", RETURN}, {"super", SUPER},
+    {"this", THIS}, {"true", TRUE},   {"var", VAR},       {"while", WHILE}};
+
 auto is_digit(char ch) -> bool {
   return ch >= '0' && ch <= '9';
+}
+
+auto is_alpha(char ch) -> bool {
+  return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
+}
+
+auto is_alphanumeric(char ch) -> bool {
+  return is_alpha(ch) || is_digit(ch);
 }
 
 auto Scanner::scan_tokens() -> std::vector<Token> {
@@ -94,6 +109,8 @@ auto Scanner::scan_token() -> void {
       //       result from top-level scan_tokens()?
       if (is_digit(c)) {
         number();
+      } else if (is_alpha(c)) {
+        identifier();
       } else {
         error(line, "Unexpected character.");
       }
@@ -162,6 +179,18 @@ auto Scanner::number() -> void {
 
   add_token(NUMBER, std::stod(std::string{source.begin() + start,
                                           source.begin() + current}));
+}
+
+auto Scanner::identifier() -> void {
+  while (is_alphanumeric(peek()))
+    advance();
+
+  std::string text = std::string{source.begin()+start, source.begin()+current};
+  auto result = keywords.find(text);
+  if (result != keywords.end())
+    add_token(result->second);
+  else
+    add_token(IDENTIFIER);
 }
 
 auto Scanner::add_token(TokenType type) -> void {

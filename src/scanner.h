@@ -27,6 +27,7 @@ class Scanner {
 
   auto string() -> void;
   auto number() -> void;
+  auto identifier() -> void;
 
   auto add_token(TokenType) -> void;
   auto add_token(TokenType, std::optional<lox_literal>&&) -> void;

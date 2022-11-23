@@ -5,10 +5,12 @@
 #ifndef LOXALONE_ERRORS_H
 #define LOXALONE_ERRORS_H
 
+#include <fmt/format.h>
 #include <exception>
 #include <string>
 
-auto report(int line, const std::string_view& where, const std::string_view& msg) {
+auto report(int line, const std::string_view& where,
+            const std::string_view& msg) {
   fmt::print(stderr, "[line {}] Error{}: {}\n", line, where, msg);
 }
 
