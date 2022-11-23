@@ -10,6 +10,7 @@
 #include <string>
 #include <variant>
 
+
 using lox_literal = std::variant<std::string, double>;
 
 enum TokenType {
@@ -166,9 +167,20 @@ struct fmt::formatter<Token> {
   template <typename FormatContext>
   auto format(const Token& token, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    // TODO: Only print the lexeme if it's interesting.
-    //       For example, literals, variable names, function names, etc.
-    return fmt::format_to(ctx.out(), "{}", tt_to_string(token.type));
+    // For some reason I can't use overload visit pattern with `ctx.out` here
+    switch (token.type) {
+      case IDENTIFIER:
+        return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
+                              token.lexeme);
+      case STRING:
+        return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
+                              std::get<std::string>(token.literal.value()));
+      case NUMBER:
+        return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
+                              std::get<double>(token.literal.value()));
+      default:
+        return fmt::format_to(ctx.out(), "({})", tt_to_string(token.type));
+    }
   }
 };
 

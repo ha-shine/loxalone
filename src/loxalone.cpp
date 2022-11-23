@@ -15,6 +15,7 @@ auto run(const std::string_view& source) -> bool {
   for (const auto& token : tokens) {
     fmt::print("{} ", token);
   }
+  fmt::print("\n");
   return true;
 }
 
