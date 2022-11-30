@@ -6,7 +6,7 @@
 #define LOXALONE_PRETTYPRINTER_H
 
 #include <string>
-#include "expr.h"
+#include "Expr.h"
 
 // TODO: Probably better to use a string builder sort of type here
 class PrettyPrinter {

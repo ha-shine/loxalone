@@ -2,8 +2,8 @@
 // Created by Htet Aung Shine on 23/11/2022.
 //
 
-#ifndef LOXALONE_ERRORS_H
-#define LOXALONE_ERRORS_H
+#ifndef LOXALONE_ERROR_H
+#define LOXALONE_ERROR_H
 
 #include <fmt/format.h>
 #include <exception>
@@ -18,4 +18,4 @@ auto error(int line, const std::string_view& msg) {
   report(line, "", msg);
 }
 
-#endif  //LOXALONE_ERRORS_H
+#endif  //LOXALONE_ERROR_H

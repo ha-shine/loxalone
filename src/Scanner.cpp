@@ -5,8 +5,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "errors.h"
-#include "scanner.h"
+#include "Error.h"
+#include "Scanner.h"
 
 static std::unordered_map<std::string, TokenType> keywords{
     {"and", AND},   {"class", CLASS}, {"else", ELSE},     {"false", FALSE},

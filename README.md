@@ -6,6 +6,22 @@ on the go with multiple devices when I was reading the book and committing frequ
 
 # Grammar
 
+## Precedence and associativity
+
+Lowest to highest
+
+| Name       | Operator          | Associates |
+|------------|-------------------|------------|
+| Equality   | `==` `!=`         | Left       |
+| Comparison | `>` `>=` `<` `<=` | Left       |
+| Term       | `-` `+`           | Left       |
+| Factor     | `/` `*`           | Left       |
+| Unary      | `!` `-`           | Right      |
+
+## Parser rule table
+
+### Simple rule table
+
 ```
 - expression -> literal
                | unary
@@ -18,4 +34,20 @@ on the go with multiple devices when I was reading the book and committing frequ
 - binary     -> expression operator expression ;
 - operator   -> "==" | "!=" | "<" | "<=" | ">" | ">="
                | "+" | "-"  | "*" | "/" ;
+```
+
+### Parser rule table
+
+Each rule matches expression at its precedence level or higher.
+The rules are made intentionally to be right-recursive.
+
+```
+- expression -> equality;
+- equality   -> comparison ( ("==" | "!=") comparison )*;
+- comparison -> term ( (">" | ">=" | "<" | "<=") term )*;
+- term       -> factor ( ("+" | "-") factor )*;
+- factor     -> unary ( ("/" | "*") unary )*;
+- unary      -> ("!" | "-") unary | primary;
+- primary    -> NUMBER | STRING | "true" | "false" | "nil"
+              | "(" expression ")";
 ```

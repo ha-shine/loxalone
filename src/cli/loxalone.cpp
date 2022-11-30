@@ -3,7 +3,7 @@
 #include <string_view>
 #include <fmt/format.h>
 
-#include "../scanner.h"
+#include "../Scanner.h"
 
 const auto USAGE = "Usage: loxalone [script]";
 

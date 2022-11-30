@@ -2,8 +2,8 @@
 // Created by Htet Aung Shine on 23/11/2022.
 //
 
-#ifndef LOXALONE_TOKENS_H
-#define LOXALONE_TOKENS_H
+#ifndef LOXALONE_TOKEN_H
+#define LOXALONE_TOKEN_H
 
 #include <fmt/format.h>
 #include <optional>
@@ -184,4 +184,4 @@ struct fmt::formatter<Token> {
   }
 };
 
-#endif  //LOXALONE_TOKENS_H
+#endif  //LOXALONE_TOKEN_H

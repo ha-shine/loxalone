@@ -7,7 +7,7 @@
 #include <fstream>
 #include <vector>
 
-#include "../misc.h"
+#include "../Misc.h"
 
 static const auto USAGE = "Usage: generate_ast <output directory>\n";
 
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     return EX_USAGE;
   }
 
-  auto filepath = std::filesystem::path{argv[1]} / "expr.h";
+  auto filepath = std::filesystem::path{argv[1]} / "Expr.h";
   std::filesystem::create_directories(filepath.parent_path());
 
   std::ofstream out{filepath, std::ios_base::out};
