@@ -79,14 +79,44 @@ auto define_ast(std::ostream& out, const std::string_view& base,
   for (const auto& cls : classes) {
     out << fmt::format("class {};\n", cls.name);
   }
+  out << "\n";
 
-  out << fmt::format("using {} = std::unique_ptr<std::variant<", base);
+  // define pointer types
+  for (const auto& cls : classes) {
+    out << fmt::format("using {}Ptr = std::unique_ptr<{}>;\n", cls.name, cls.name);
+  }
+  out << "\n";
+
+  // define Expr type
+  out << fmt::format("using {} = std::variant<", base);
   for (int i = 0; i < classes.size(); i++) {
-    out << classes[i].name;
+    out << classes[i].name << "Ptr";
     if (i < classes.size() - 1)
       out << ",";
   }
-  out << ">>;\n\n";
+  out << ">;\n\n";
+
+  // define Visitor concept so callers can static_assert their type to ensure
+  // the visitor classes are compliant, ie define all required methods
+  out << "template <typename V, typename Out>\n"
+      << "concept Visitor = requires (V v,";
+  for (int i = 0; i < classes.size(); i++) {
+    out << fmt::format(" const {}Ptr& arg_{}", classes[i].name, i);
+    if (i < classes.size() - 1)
+      out << ",";
+  }
+  out << ") { \n";
+  for (int i = 0; i < classes.size(); i++) {
+    out << fmt::format("  {{ v(arg_{}) }} -> std::convertible_to<Out>;\n", i);
+  }
+  out << "};\n\n";
+
+  // define visit method that will be used for visiting expressions
+  out << "template <typename V, typename Out>\n"
+      << "  requires Visitor<V, Out>\n"
+      << fmt::format("auto visit(const V& v, {}& expr) -> Out {{\n", base)
+      << "  return std::visit(v, expr);\n"
+      << "}\n\n";
 
   for (const auto& cls : classes) {
     define_type(out, base, cls);

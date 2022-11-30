@@ -11,8 +11,29 @@ class BinaryExpr;
 class GroupingExpr;
 class LiteralVal;
 class UnaryExpr;
-using Expr = std::unique_ptr<
-    std::variant<BinaryExpr, GroupingExpr, LiteralVal, UnaryExpr>>;
+
+using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
+using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
+using LiteralValPtr = std::unique_ptr<LiteralVal>;
+using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
+
+using Expr =
+    std::variant<BinaryExprPtr, GroupingExprPtr, LiteralValPtr, UnaryExprPtr>;
+
+template <typename V, typename Out>
+concept Visitor =
+    requires(V v, const BinaryExprPtr& arg_0, const GroupingExprPtr& arg_1,
+             const LiteralValPtr& arg_2, const UnaryExprPtr& arg_3) {
+  { v(arg_0) } -> std::convertible_to<Out>;
+  { v(arg_1) } -> std::convertible_to<Out>;
+  { v(arg_2) } -> std::convertible_to<Out>;
+  { v(arg_3) } -> std::convertible_to<Out>;
+};
+
+template <typename V, typename Out>
+requires Visitor<V, Out> auto visit(const V& v, Expr& expr) -> Out {
+  return std::visit(v, expr);
+}
 
 class BinaryExpr {
  public:
