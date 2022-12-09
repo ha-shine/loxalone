@@ -4,6 +4,14 @@
 
 #include "Parser.h"
 
+auto Parser::parse() -> std::optional<Expr> {
+  try {
+    return expression();
+  } catch (const ParserError& pe) {
+    return std::nullopt;
+  }
+}
+
 auto Parser::expression() -> Expr {
   return equality();
 }
@@ -86,8 +94,7 @@ auto Parser::primary() -> Expr {
     return Expr{std::make_unique<GroupingExpr>(std::move(expr))};
   }
 
-  // TODO: Error message
-  throw std::runtime_error{"invalid token"};
+  throw parser_error(peek(), "Expect expression.");
 }
 
 auto Parser::previous() -> const Token& {

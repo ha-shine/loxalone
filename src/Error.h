@@ -9,12 +9,12 @@
 #include <exception>
 #include <string>
 
-auto report(int line, const std::string_view& where,
-            const std::string_view& msg) {
+static auto report(int line, const std::string_view& where,
+            const std::string_view& msg)  {
   fmt::print(stderr, "[line {}] Error{}: {}\n", line, where, msg);
 }
 
-auto error(int line, const std::string_view& msg) {
+static auto error(int line, const std::string_view& msg) {
   report(line, "", msg);
 }
 

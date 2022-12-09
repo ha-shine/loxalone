@@ -5,6 +5,7 @@
 #ifndef LOXALONE_PARSER_H
 #define LOXALONE_PARSER_H
 
+#include <optional>
 #include <vector>
 #include "Error.h"
 #include "Expr.h"
@@ -22,6 +23,8 @@ class ParserError : std::exception {
 class Parser {
  public:
   explicit Parser(const std::vector<Token>& tokens) : tokens_m{tokens} {}
+
+  auto parse() -> std::optional<Expr>;
 
  private:
   auto expression() -> Expr;
