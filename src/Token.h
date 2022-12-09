@@ -4,16 +4,16 @@
 
 #ifndef LOXALONE_TOKEN_H
 #define LOXALONE_TOKEN_H
+#undef EOF
 
 #include <fmt/format.h>
 #include <optional>
 #include <string>
 #include <variant>
 
+using lox_literal = std::variant<std::string, double, bool, std::monostate>;
 
-using lox_literal = std::variant<std::string, double>;
-
-enum TokenType {
+enum class TokenType {
   LEFT_PAREN,
   RIGHT_PAREN,
   LEFT_BRACE,
@@ -56,7 +56,7 @@ enum TokenType {
   VAR,
   WHILE,
 
-  EOF_CHAR
+  EOF
 };
 
 constexpr const char* tt_to_string(TokenType type) {
@@ -141,8 +141,8 @@ constexpr const char* tt_to_string(TokenType type) {
     case TokenType::WHILE:
       return "WHILE";
 
-    case TokenType::EOF_CHAR:
-      return "EOF_CHAR";
+    case TokenType::EOF:
+      return "EOF";
   }
 }
 
@@ -169,18 +169,33 @@ struct fmt::formatter<Token> {
       -> decltype(ctx.out()) {
     // For some reason I can't use overload visit pattern with `ctx.out` here
     switch (token.type) {
-      case IDENTIFIER:
+      case TokenType::IDENTIFIER:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               token.lexeme);
-      case STRING:
+      case TokenType::STRING:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               std::get<std::string>(token.literal.value()));
-      case NUMBER:
+      case TokenType::NUMBER:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               std::get<double>(token.literal.value()));
       default:
         return fmt::format_to(ctx.out(), "({})", tt_to_string(token.type));
     }
+  }
+};
+
+// Formatter implementation for std::monostate
+template <>
+struct fmt::formatter<std::monostate> {
+  constexpr auto parse(fmt::format_parse_context& ctx)
+      -> decltype(ctx.begin()) {
+    return ctx.end();
+  }
+
+  template <typename FormatContext>
+  auto format(const std::monostate& token, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "std::monostate");
   }
 };
 

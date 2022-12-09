@@ -60,7 +60,7 @@ auto define_ast(std::ostream& out, const std::string_view& base,
       << "#include <memory>\n"
       << "#include <string>\n"
       << "#include <variant>\n\n"
-      << "#include \"tokens.h\"\n\n";
+      << "#include \"tokens_m.h\"\n\n";
 
   std::vector<Class> classes{};
   for (const auto& type : types) {

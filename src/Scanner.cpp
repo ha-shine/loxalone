@@ -5,14 +5,13 @@
 #include <string>
 #include <unordered_map>
 
-#include "Error.h"
 #include "Scanner.h"
 
 static std::unordered_map<std::string, TokenType> keywords{
-    {"and", AND},   {"class", CLASS}, {"else", ELSE},     {"false", FALSE},
-    {"for", FOR},   {"fun", FUN},     {"if", IF},         {"nil", NIL},
-    {"or", OR},     {"print", PRINT}, {"return", RETURN}, {"super", SUPER},
-    {"this", THIS}, {"true", TRUE},   {"var", VAR},       {"while", WHILE}};
+    {"and", TokenType::AND},   {"class", TokenType::CLASS}, {"else", TokenType::ELSE},     {"false", TokenType::FALSE},
+    {"for", TokenType::FOR},   {"fun", TokenType::FUN},     {"if", TokenType::IF},         {"nil", TokenType::NIL},
+    {"or", TokenType::OR},     {"print", TokenType::PRINT}, {"return", TokenType::RETURN}, {"super", TokenType::SUPER},
+    {"this", TokenType::THIS}, {"true", TokenType::TRUE},   {"var", TokenType::VAR},       {"while", TokenType::WHILE}};
 
 auto is_digit(char ch) -> bool {
   return ch >= '0' && ch <= '9';
@@ -32,7 +31,7 @@ auto Scanner::scan_tokens() -> std::optional<std::vector<Token>> {
     scan_token();
   }
 
-  tokens.emplace_back(EOF_CHAR, "", std::nullopt, line_m);
+  tokens.emplace_back(TokenType::EOF, "", std::nullopt, line_m);
   return well_formed_m ? std::optional{tokens} : std::nullopt;
 }
 
@@ -42,46 +41,46 @@ auto Scanner::scan_token() -> void {
 
   switch (c) {
     case '(':
-      add_token(LEFT_PAREN);
+      add_token(TokenType::LEFT_PAREN);
       break;
     case ')':
-      add_token(RIGHT_PAREN);
+      add_token(TokenType::RIGHT_PAREN);
       break;
     case '{':
-      add_token(LEFT_BRACE);
+      add_token(TokenType::LEFT_BRACE);
       break;
     case '}':
-      add_token(RIGHT_BRACE);
+      add_token(TokenType::RIGHT_BRACE);
       break;
     case ',':
-      add_token(COMMA);
+      add_token(TokenType::COMMA);
       break;
     case '.':
-      add_token(DOT);
+      add_token(TokenType::DOT);
       break;
     case '-':
-      add_token(MINUS);
+      add_token(TokenType::MINUS);
       break;
     case '+':
-      add_token(PLUS);
+      add_token(TokenType::PLUS);
       break;
     case ';':
-      add_token(SEMICOLON);
+      add_token(TokenType::SEMICOLON);
       break;
     case '*':
-      add_token(STAR);
+      add_token(TokenType::STAR);
       break;
     case '!':
-      add_token(match('=') ? BANG_EQUAL : BANG);
+      add_token(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
       break;
     case '=':
-      add_token(match('=') ? EQUAL_EQUAL : EQUAL);
+      add_token(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
       break;
     case '<':
-      add_token(match('=') ? LESS_EQUAL : LESS);
+      add_token(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
       break;
     case '>':
-      add_token(match('=') ? GREATER_EQUAL : GREATER);
+      add_token(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
       break;
     case '/':
       if (match('/')) {
@@ -104,7 +103,7 @@ auto Scanner::scan_token() -> void {
 
         error(line_m, "Unterminated block comment.");
       } else {
-        add_token(SLASH);
+        add_token(TokenType::SLASH);
       }
       break;
     case '"':
@@ -120,8 +119,8 @@ auto Scanner::scan_token() -> void {
       line_m++;
       break;
     default:
-      // TODO: This should set an error flag in Lox so we won't execute
-      //       the malformed program though we can just return empty tokens or
+      // TODO: This should set an parser_error flag in Lox so we won't execute
+      //       the malformed program though we can just return empty tokens_m or
       //       result from top-level scan_tokens()?
       if (is_digit(c)) {
         number();
@@ -178,7 +177,7 @@ auto Scanner::string() -> void {
 
   advance();  // consume the closing "
   std::string value{source.begin() + start_m + 1, source.begin() + current_m - 1};
-  add_token(STRING, std::string{source.begin() + start_m + 1,
+  add_token(TokenType::STRING, std::string{source.begin() + start_m + 1,
                                 source.begin() + current_m - 1});
 }
 
@@ -193,7 +192,7 @@ auto Scanner::number() -> void {
       advance();
   }
 
-  add_token(NUMBER, std::stod(std::string{source.begin() + start_m,
+  add_token(TokenType::NUMBER, std::stod(std::string{source.begin() + start_m,
                                           source.begin() + current_m}));
 }
 
@@ -206,7 +205,7 @@ auto Scanner::identifier() -> void {
   if (result != keywords.end())
     add_token(result->second);
   else
-    add_token(IDENTIFIER);
+    add_token(TokenType::IDENTIFIER);
 }
 
 auto Scanner::add_token(TokenType type) -> void {
@@ -221,6 +220,6 @@ auto Scanner::add_token(TokenType type, std::optional<lox_literal>&& literal)
 }
 
 auto Scanner::error(int line, const std::string_view& msg) -> void {
-  ::error(line, msg);
+  error(line, msg);
   well_formed_m = false;
 }
