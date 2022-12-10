@@ -22,6 +22,6 @@ class PrettyPrinter {
   auto parenthesize(const std::string_view&, const Expr&, const Expr&) -> std::string;
 };
 
-static_assert(Visitor<PrettyPrinter, std::string>);
+static_assert(ExprVisitor<PrettyPrinter, std::string>);
 
 #endif  //LOXALONE_PRETTYPRINTER_H

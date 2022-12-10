@@ -33,6 +33,6 @@ class Interpreter {
   auto check_are_numbers(const Token&, const lox_literal&, const lox_literal&) -> void;
 };
 
-static_assert(Visitor<Interpreter, lox_literal>);
+static_assert(ExprVisitor<Interpreter, lox_literal>);
 
 #endif  //LOXALONE_INTERPRETER_H

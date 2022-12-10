@@ -5,10 +5,11 @@
 #include "Misc.h"
 
 auto to_lowercase(const std::string_view& source) -> std::string {
-  std::string result{};
-  for (const auto& ch : source)
-    result.push_back(static_cast<char>(tolower(ch)));
-  return result;
+  return transform_chars(source, tolower);
+}
+
+auto to_uppercase(const std::string_view& source) -> std::string {
+  return transform_chars(source, toupper);
 }
 
 auto split(const std::string_view& source, char delim)

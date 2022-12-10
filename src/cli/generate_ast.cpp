@@ -24,7 +24,6 @@ auto define_type(std::ostream& out, const std::string_view& base,
                  const Class& cls) -> void {
   out << fmt::format("class {}", cls.name) << " {\n"
       << " public:\n";
-
   for (const auto& field : cls.fields) {
     // Not very great but this will do for now...
     out << fmt::format("  const {} {}_m;\n", field.type, field.name);
@@ -53,14 +52,24 @@ auto define_type(std::ostream& out, const std::string_view& base,
 
 // TODO: Revisit this by checking out other interpreters, how do we implement
 //       visiting without pointers?
-auto define_ast(std::ostream& out, const std::string_view& base,
-                const std::vector<std::string_view>& types) -> int {
-  out << "#ifndef LOXALONE_EXPR_H\n"
-      << "#define LOXALONE_EXPR_H\n\n"
+// TODO: Maybe a better way is to have a template engine do all of these for us?
+auto define_ast(const std::filesystem::path& filepath,
+                const std::string_view& base,
+                const std::vector<std::string_view>& types,
+                const std::vector<std::string_view>& imports) -> int {
+  std::ofstream out{filepath, std::ios_base::out};
+
+  out << fmt::format("#ifndef LOXALONE_{}_H\n", base)
+      << fmt::format("#define LOXALONE_{}_H\n\n", base)
       << "#include <memory>\n"
       << "#include <string>\n"
       << "#include <variant>\n\n"
-      << "#include \"tokens_m.h\"\n\n";
+      << "#include \"Token.h\"\n\n";
+
+  for (const auto& imp : imports) {
+    out << fmt::format("#include \"{}\"\n", imp);
+  }
+  out << '\n';
 
   std::vector<Class> classes{};
   for (const auto& type : types) {
@@ -83,7 +92,8 @@ auto define_ast(std::ostream& out, const std::string_view& base,
 
   // define pointer types
   for (const auto& cls : classes) {
-    out << fmt::format("using {}Ptr = std::unique_ptr<{}>;\n", cls.name, cls.name);
+    out << fmt::format("using {}Ptr = std::unique_ptr<{}>;\n", cls.name,
+                       cls.name);
   }
   out << "\n";
 
@@ -99,7 +109,7 @@ auto define_ast(std::ostream& out, const std::string_view& base,
   // define Visitor concept so callers can static_assert their type to ensure
   // the visitor classes are compliant, ie define all required methods
   out << "template <typename V, typename Out>\n"
-      << "concept Visitor = requires (V v,";
+      << fmt::format("concept {}Visitor = requires (V v,", base);
   for (int i = 0; i < classes.size(); i++) {
     out << fmt::format(" const {}Ptr& arg_{}", classes[i].name, i);
     if (i < classes.size() - 1)
@@ -110,13 +120,6 @@ auto define_ast(std::ostream& out, const std::string_view& base,
     out << fmt::format("  {{ v(arg_{}) }} -> std::convertible_to<Out>;\n", i);
   }
   out << "};\n\n";
-
-  // define visit method that will be used for visiting expressions
-  out << "template <typename V, typename Out>\n"
-      << "  requires Visitor<V, Out>\n"
-      << fmt::format("auto visit(const V& v, {}& expr) -> Out {{\n", base)
-      << "  return std::visit(v, expr);\n"
-      << "}\n\n";
 
   for (const auto& cls : classes) {
     define_type(out, base, cls);
@@ -133,13 +136,16 @@ int main(int argc, char** argv) {
     return EX_USAGE;
   }
 
-  auto filepath = std::filesystem::path{argv[1]} / "Expr.h";
-  std::filesystem::create_directories(filepath.parent_path());
+  auto filepath = std::filesystem::path{argv[1]};
+  std::filesystem::create_directories(filepath);
 
-  std::ofstream out{filepath, std::ios_base::out};
-  return define_ast(
-      out, "Expr",
+  define_ast(
+      filepath / "Expr.h", "Expr",
       {"BinaryExpr   : Expr left, Token oper, Expr right",
-       "GroupingExpr : Expr expression", "LiteralVal   : lox_literal value",
-       "UnaryExpr    : Token oper, Expr right"});
+       "GroupingExpr : Expr expression", "LiteralVal : lox_literal value",
+       "UnaryExpr    : Token oper, Expr right"},
+      {});
+  define_ast(filepath / "Stmt.h", "Stmt",
+             {"Expression : Expr expression", "Print : Expr expression"},
+             {"Expr.h"});
 }
