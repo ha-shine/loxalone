@@ -9,6 +9,7 @@
 #include <vector>
 #include "Error.h"
 #include "Expr.h"
+#include "Stmt.h"
 #include "Token.h"
 
 class ParserError : std::exception {
@@ -24,9 +25,18 @@ class Parser {
  public:
   explicit Parser(const std::vector<Token>& tokens) : tokens_m{tokens} {}
 
-  auto parse() -> std::optional<Expr>;
+  // The main entry point of the parser,
+  // parses the source text into list of statements
+  auto parse() -> std::vector<Stmt>;
 
  private:
+
+  // Statement parsing functions
+  auto statement() -> Stmt;
+  auto print_statement() -> Stmt;
+  auto expression_statement() -> Stmt;
+
+  // Expression parsing functions
   auto expression() -> Expr;
   auto equality() -> Expr;
   auto comparison() -> Expr;
@@ -34,8 +44,9 @@ class Parser {
   auto factor() -> Expr;
   auto unary() -> Expr;
   auto primary() -> Expr;
-  auto previous() -> const Token&;
 
+  // Helper methods to help with the parsing
+  auto previous() -> const Token&;
   auto check(TokenType) -> bool;
   auto advance() -> const Token&;
   auto peek() -> const Token&;

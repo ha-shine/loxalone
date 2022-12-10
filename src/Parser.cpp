@@ -4,12 +4,36 @@
 
 #include "Parser.h"
 
-auto Parser::parse() -> std::optional<Expr> {
+auto Parser::parse() -> std::vector<Stmt> {
+  std::vector<Stmt> result{};
   try {
-    return expression();
-  } catch (const ParserError& pe) {
-    return std::nullopt;
+    while (!is_at_end()) {
+      result.emplace_back(statement());
+    }
+
+    return result;
+  } catch (const ParserError& err) {
+    // TODO: How do we report this?
+    return {};
   }
+}
+
+auto Parser::statement() -> Stmt {
+  if (match(TokenType::PRINT))
+    return print_statement();
+
+  return expression_statement();
+}
+auto Parser::print_statement() -> Stmt {
+  Expr expr = expression();
+  consume(TokenType::SEMICOLON, "Expect ';' after value.");
+  return Stmt{std::make_unique<Print>(std::move(expr))};
+}
+
+auto Parser::expression_statement() -> Stmt {
+  Expr expr = expression();
+  consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+  return Stmt{std::make_unique<Expression>(std::move(expr))};
 }
 
 auto Parser::expression() -> Expr {

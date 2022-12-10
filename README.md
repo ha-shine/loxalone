@@ -42,6 +42,12 @@ Each rule matches expression at its precedence level or higher.
 The rules are made intentionally to be right-recursive.
 
 ```
+
+- program           -> statement* EOF ;
+- statement         -> expr_statement
+                     | print_statement ;
+- expr_statement    -> expression ";" ;
+- print_statement   -> "print" expression ";" ;
 - expression        -> equality;
 - equality          -> comparison ( ("==" | "!=") comparison )*;
 - comparison        -> term ( (">" | ">=" | "<" | "<=") term )*;
@@ -50,13 +56,7 @@ The rules are made intentionally to be right-recursive.
 - unary             -> ("!" | "-") unary | primary;
 - primary           -> NUMBER | STRING | "true" | "false" | "nil"
                      | "(" expression ")";
-              
-              
-- program           -> statement* EOF ;
-- statement         -> expr_statement
-                     | print_statement ;
-- expr_statement    -> expression ";" ;
-- print_statement   -> "print" expression ";" ;
+
 ```
 
 ### Feature Ideas (and challenges)
