@@ -13,7 +13,9 @@ set(sources
         src/Expr.cpp
         src/Expr.h
         src/Parser.cpp
-        src/Parser.h)
+        src/Parser.h
+        src/Interpreter.h
+        src/Interpreter.cpp)
 
 add_executable(loxalone src/cli/loxalone.cpp src/PrettyPrinter.cpp src/PrettyPrinter.h ${sources})
 target_link_libraries(loxalone PRIVATE fmt::fmt)

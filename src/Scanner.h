@@ -32,7 +32,7 @@ class Scanner {
   auto add_token(TokenType) -> void;
   auto add_token(TokenType, std::optional<lox_literal>&&) -> void;
 
-  auto error(int line, const std::string_view& msg) -> void;
+  auto scanner_error(int line, const std::string_view& msg) -> void;
 
   const std::string_view& source;
   std::vector<Token> tokens;

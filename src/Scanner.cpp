@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "Error.h"
 #include "Scanner.h"
 
 static std::unordered_map<std::string, TokenType> keywords{
@@ -101,7 +102,7 @@ auto Scanner::scan_token() -> void {
         if (done)
           break;
 
-        error(line_m, "Unterminated block comment.");
+        scanner_error(line_m, "Unterminated block comment.");
       } else {
         add_token(TokenType::SLASH);
       }
@@ -127,7 +128,7 @@ auto Scanner::scan_token() -> void {
       } else if (is_alpha(c)) {
         identifier();
       } else {
-        error(line_m, "Unexpected character.");
+        scanner_error(line_m, "Unexpected character.");
       }
   }
 }
@@ -171,7 +172,7 @@ auto Scanner::string() -> void {
   }
 
   if (is_at_end()) {
-    error(line_m, "Unterminated string.");
+    scanner_error(line_m, "Unterminated string.");
     return;
   }
 
@@ -219,7 +220,7 @@ auto Scanner::add_token(TokenType type, std::optional<lox_literal>&& literal)
       std::move(literal), line_m);
 }
 
-auto Scanner::error(int line, const std::string_view& msg) -> void {
+auto Scanner::scanner_error(int line, const std::string_view& msg) -> void {
   error(line, msg);
   well_formed_m = false;
 }

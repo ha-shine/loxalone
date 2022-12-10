@@ -51,3 +51,10 @@ The rules are made intentionally to be right-recursive.
 - primary    -> NUMBER | STRING | "true" | "false" | "nil"
               | "(" expression ")";
 ```
+
+### Feature Ideas (and challenges)
+
+- Add support for C-style ternary operator (?:), one-liner if clauses
+- `--verbose` parameter in CLI prompt for extra statistics (like execution time, etc.)
+- Handle divide by 0 error
+- `+` operator currently only concatenates or add numbers. Extend it to allow concatenating a number to a string

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string_view>
 
+#include "../Interpreter.h"
 #include "../Parser.h"
 #include "../PrettyPrinter.h"
 #include "../Scanner.h"
@@ -10,6 +11,9 @@
 const auto USAGE = "Usage: loxalone [script]";
 
 // Probably should return result rather than boolean
+// And also each line is run once here, the interpreter probably needs to
+// maintain internal state (e.g variables set, classes defined, etc.)
+// and probably needs to move the run function out of this
 auto run(const std::string_view& source) -> bool {
   Scanner scanner{source};
   std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
@@ -23,8 +27,8 @@ auto run(const std::string_view& source) -> bool {
   if (!expression.has_value())
     return false;
 
-  PrettyPrinter printer{};
-  fmt::print("Parsed statement - {}\n", visit<std::string>(printer, expression.value()));
+  Interpreter interpreter{};
+  interpreter.interpret(expression.value());
   return true;
 }
 
@@ -40,9 +44,7 @@ auto run_prompt() -> int {
     std::getline(std::cin, input);
 
     if (input.length() > 0) {
-      if (bool ok = run(input); !ok) {
-        return EX_DATAERR;
-      }
+      run(input);
     }
   }
 }

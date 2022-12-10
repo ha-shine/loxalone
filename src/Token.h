@@ -199,4 +199,37 @@ struct fmt::formatter<std::monostate> {
   }
 };
 
+// std::string, double, bool, std::monostate
+template<typename FormatContext>
+class LiteralFormatter {
+ private:
+  FormatContext& ctx;
+
+ public:
+  auto operator()(const auto& arg) -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "{}\n", arg);
+  }
+
+  auto operator()(const std::monostate& arg) -> decltype(ctx.out()) {
+    return fmt::format_to(ctx.out(), "nil\n");
+  }
+
+  LiteralFormatter(FormatContext& ctx): ctx{ctx} {}
+};
+
+// Formatter implementation for lox_literal
+template <>
+struct fmt::formatter<lox_literal> {
+  constexpr auto parse(fmt::format_parse_context& ctx)
+      -> decltype(ctx.begin()) {
+    return ctx.end();
+  }
+
+  template <typename FormatContext>
+  auto format(const lox_literal& val, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    return std::visit(LiteralFormatter(ctx), val);
+  }
+};
+
 #endif  //LOXALONE_TOKEN_H

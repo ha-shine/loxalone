@@ -169,8 +169,8 @@ auto Parser::synchronize() -> void {
       case TokenType::PRINT:
       case TokenType::RETURN:
         return;
+      default:
+        advance();
     }
-
-    advance();
   }
 }
