@@ -9,6 +9,17 @@
 #include <exception>
 #include <string>
 
+#include "Token.h"
+
+class RuntimeError : std::exception {
+ public:
+  RuntimeError(Token token, const std::string_view& msg)
+      : token{std::move(token)}, msg{msg} {}
+
+  const std::string msg;
+  const Token token;
+};
+
 static auto report(int line, const std::string_view& where,
             const std::string_view& msg)  {
   fmt::print(stderr, "[line {}] Error{}: {}\n", line, where, msg);

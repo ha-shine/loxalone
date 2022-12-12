@@ -8,21 +8,16 @@
 #include <utility>
 #include <vector>
 
+#include "Environment.h"
+#include "Error.h"
 #include "Expr.h"
 #include "Stmt.h"
 #include "Token.h"
 
-class RuntimeError : std::exception {
- public:
-  RuntimeError(Token token, const std::string_view& msg)
-      : token{std::move(token)}, msg{msg} {}
-
-  const std::string msg;
-  const Token token;
-};
-
 class Interpreter {
  public:
+  Interpreter() : env{} {}
+
   // Expression visitor
   auto operator()(const BinaryExprPtr&) -> lox_literal;
   auto operator()(const GroupingExprPtr&) -> lox_literal;
@@ -42,7 +37,10 @@ class Interpreter {
  private:
   auto check_is_number(const Token&, const lox_literal&) -> void;
   auto check_is_boolean(const Token&, const lox_literal&) -> void;
-  auto check_are_numbers(const Token&, const lox_literal&, const lox_literal&) -> void;
+  auto check_are_numbers(const Token&, const lox_literal&, const lox_literal&)
+      -> void;
+
+  Environment env;
 };
 
 static_assert(ExprVisitor<Interpreter, lox_literal>);

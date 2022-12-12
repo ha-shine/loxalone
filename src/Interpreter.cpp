@@ -26,8 +26,10 @@ auto is_equal(const lox_literal& left, const lox_literal& right) -> bool {
   return false;
 }
 
-// TODO: No scanner_error checking implemented for these methods yet?
 auto Interpreter::operator()(const BinaryExprPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
+
   auto left = visit<lox_literal>(*this, expr->left_m);
   auto right = visit<lox_literal>(*this, expr->right_m);
 
@@ -73,14 +75,23 @@ auto Interpreter::operator()(const BinaryExprPtr& expr) -> lox_literal {
 }
 
 auto Interpreter::operator()(const GroupingExprPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
+
   return visit<lox_literal>(*this, expr->expression_m);
 }
 
 auto Interpreter::operator()(const LiteralValPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
+
   return expr->value_m;
 }
 
 auto Interpreter::operator()(const UnaryExprPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
+
   auto right = visit<lox_literal>(*this, expr->right_m);
 
   switch (expr->oper_m.type) {
@@ -95,9 +106,13 @@ auto Interpreter::operator()(const UnaryExprPtr& expr) -> lox_literal {
   }
 }
 
-auto Interpreter::operator()(const VariablePtr&) -> lox_literal {
-  // TODO: Not implemented
-  return lox_literal();
+auto Interpreter::operator()(const VariablePtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
+
+  // TODO: This returns the copied value (and create a variant object).
+  //       Profile this function.
+  return env.get(expr->name_m);
 }
 
 auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {
@@ -109,8 +124,9 @@ auto Interpreter::operator()(const PrintPtr& stmt) -> void {
   fmt::print("{}\n", value);
 }
 
-auto Interpreter::operator()(const VarPtr&) -> void {
-  // TODO: Not implemented
+auto Interpreter::operator()(const VarPtr& stmt) -> void {
+  lox_literal val = visit(*this, stmt->initializer_m);
+  env.define(stmt->name_m.lexeme, val);
 }
 
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {

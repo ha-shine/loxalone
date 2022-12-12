@@ -5,6 +5,7 @@
 #include "PrettyPrinter.h"
 
 #include <sstream>
+#include "Token.h"
 
 auto PrettyPrinter::operator()(const BinaryExprPtr& expr) -> std::string {
   return parenthesize(expr->oper_m.lexeme, expr->left_m, expr->right_m);
@@ -26,16 +27,17 @@ auto PrettyPrinter::operator()(const UnaryExprPtr& expr) -> std::string {
 
 auto PrettyPrinter::parenthesize(const std::string_view& name, const Expr& expr)
     -> std::string {
-  std::ostringstream oss;
-  oss << "(" << name << " " << visit(*this, expr) << ")";
-  return oss.str();
+  return fmt::format("({} {})", name, visit(*this, expr));
 }
 
 auto PrettyPrinter::parenthesize(const std::string_view& name,
                                  const Expr& expr1, const Expr& expr2)
     -> std::string {
-  std::ostringstream oss;
-  oss << "(" << name << " " << visit(*this, expr1) << " " << visit(*this, expr2)
-      << ")";
-  return oss.str();
+  return fmt::format("({} {} {})", name, visit(*this, expr1),
+                     visit(*this, expr2));
+}
+
+auto PrettyPrinter::operator()(const VariablePtr& expr) -> std::string {
+  return fmt::format("var:{}:{}", expr->name_m.lexeme,
+                     expr->name_m.literal.value());
 }
