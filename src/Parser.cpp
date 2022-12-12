@@ -62,7 +62,25 @@ auto Parser::expression_statement() -> Stmt {
 }
 
 auto Parser::expression() -> Expr {
-  return equality();
+  return assignment();
+}
+
+auto Parser::assignment() -> Expr {
+  Expr expr = equality();
+
+  if (match(TokenType::EQUAL)) {
+    const Token& equals = previous();
+    Expr value = assignment();
+
+    if (std::holds_alternative<VariablePtr>(expr)) {
+      Token name = std::get<VariablePtr>(expr)->name_m;
+      return Expr{std::make_unique<Assign>(std::move(name), std::move(value))};
+    }
+
+    parser_error(equals, "Invalid assignment target.");
+  }
+
+  return expr;
 }
 
 auto Parser::equality() -> Expr {

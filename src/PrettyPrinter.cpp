@@ -38,6 +38,11 @@ auto PrettyPrinter::parenthesize(const std::string_view& name,
 }
 
 auto PrettyPrinter::operator()(const VariablePtr& expr) -> std::string {
-  return fmt::format("var:{}:{}", expr->name_m.lexeme,
+  return fmt::format("(var {}={})", expr->name_m.lexeme,
                      expr->name_m.literal.value());
+}
+
+auto PrettyPrinter::operator()(const AssignPtr& expr) -> std::string {
+  return fmt::format("(assign {}={})", expr->name_m.lexeme,
+                     visit(*this, expr->value_m));
 }

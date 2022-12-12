@@ -140,7 +140,8 @@ int main(int argc, char** argv) {
 
   define_ast(
       filepath / "Expr.h", "Expr",
-      {"BinaryExpr   : Expr left, Token oper, Expr right",
+      {"Assign : Token name, Expr value",
+       "BinaryExpr   : Expr left, Token oper, Expr right",
        "GroupingExpr : Expr expression", "LiteralVal : lox_literal value",
        "UnaryExpr    : Token oper, Expr right", "Variable : Token name"},
       {});

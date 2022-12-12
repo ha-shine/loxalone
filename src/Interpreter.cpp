@@ -115,6 +115,12 @@ auto Interpreter::operator()(const VariablePtr& expr) -> lox_literal {
   return env.get(expr->name_m);
 }
 
+auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
+  lox_literal value = visit(*this, expr->value_m);
+  env.assign(expr->name_m, value);
+  return value;
+}
+
 auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {
   visit(*this, stmt->expression_m);
 }

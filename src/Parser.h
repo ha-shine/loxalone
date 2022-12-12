@@ -40,6 +40,7 @@ class Parser {
 
   // Expression parsing functions
   auto expression() -> Expr;
+  auto assignment() -> Expr;
   auto equality() -> Expr;
   auto comparison() -> Expr;
   auto term() -> Expr;

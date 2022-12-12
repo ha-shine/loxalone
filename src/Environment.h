@@ -20,6 +20,7 @@ class Environment {
 
   auto define(const std::string_view&, lox_literal) -> void;
   auto get(const Token&) -> const lox_literal&;
+  auto assign(const Token&, lox_literal) -> void;
 
  private:
   std::unordered_map<std::string, lox_literal> values;

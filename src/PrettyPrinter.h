@@ -16,6 +16,7 @@ class PrettyPrinter {
   auto operator()(const LiteralValPtr&) -> std::string;
   auto operator()(const UnaryExprPtr&) -> std::string;
   auto operator()(const VariablePtr&) -> std::string;
+  auto operator()(const AssignPtr&) -> std::string;
 
  private:
   // TODO: Can these two be written with variadic template?

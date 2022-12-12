@@ -24,16 +24,18 @@ Lowest to highest
 
 ```
 - expression -> literal
-               | unary
-               | binary
-               | grouping ;
-                
+              | unary
+              | binary
+              | grouping 
+              | assignment ;
+- assignment -> IDENTIFIER "=" assignment 
+              | equality;
 - literal    -> NUMBER | STRING | "true" | "false" | "nil" ;
 - grouping   -> "(" expression ")" ;
 - unary      -> ( "-" | "!" ) expression ;
 - binary     -> expression operator expression ;
 - operator   -> "==" | "!=" | "<" | "<=" | ">" | ">="
-               | "+" | "-"  | "*" | "/" ;
+              | "+" | "-"  | "*" | "/" ;
 ```
 
 ### Parser rule table
