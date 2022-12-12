@@ -32,6 +32,8 @@ class Parser {
  private:
 
   // Statement parsing functions
+  auto declaration() -> Stmt;
+  auto var_declaration() -> Stmt;
   auto statement() -> Stmt;
   auto print_statement() -> Stmt;
   auto expression_statement() -> Stmt;

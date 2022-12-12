@@ -8,7 +8,7 @@ auto Parser::parse() -> std::vector<Stmt> {
   std::vector<Stmt> result{};
   try {
     while (!is_at_end()) {
-      result.emplace_back(statement());
+      result.emplace_back(declaration());
     }
 
     return result;
@@ -18,12 +18,37 @@ auto Parser::parse() -> std::vector<Stmt> {
   }
 }
 
+auto Parser::declaration() -> Stmt {
+  try {
+    if (match(TokenType::VAR))
+      return var_declaration();
+
+    return statement();
+  } catch (const ParserError& err) {
+    synchronize();
+    return std::unique_ptr<Var>(nullptr);
+  }
+}
+
+auto Parser::var_declaration() -> Stmt {
+  Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+
+  Expr init = std::unique_ptr<Variable>(nullptr);
+  if (match(TokenType::EQUAL)) {
+    init = expression();
+  }
+
+  consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
+  return Stmt{std::make_unique<Var>(std::move(name), std::move(init))};
+}
+
 auto Parser::statement() -> Stmt {
   if (match(TokenType::PRINT))
     return print_statement();
 
   return expression_statement();
 }
+
 auto Parser::print_statement() -> Stmt {
   Expr expr = expression();
   consume(TokenType::SEMICOLON, "Expect ';' after value.");
@@ -56,7 +81,8 @@ auto Parser::equality() -> Expr {
 auto Parser::comparison() -> Expr {
   Expr expr = term();
 
-  while (match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
+  while (match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS,
+               TokenType::LESS_EQUAL)) {
     Token oper = previous();
     Expr right = term();
     expr = Expr{std::make_unique<BinaryExpr>(std::move(expr), std::move(oper),
@@ -117,6 +143,10 @@ auto Parser::primary() -> Expr {
     consume(TokenType::RIGHT_PAREN, "Expect ')' after expression");
     return Expr{std::make_unique<GroupingExpr>(std::move(expr))};
   }
+  if (match(TokenType::IDENTIFIER)) {
+    Token prev = previous();
+    return Expr{std::make_unique<Variable>(std::move(prev))};
+  }
 
   throw parser_error(peek(), "Expect expression.");
 }
@@ -167,7 +197,8 @@ auto Parser::consume(TokenType type, std::string_view&& msg) -> Token {
   throw parser_error(peek(), msg);
 }
 
-auto Parser::parser_error(const Token& token, const std::string_view& err) -> ParserError {
+auto Parser::parser_error(const Token& token, const std::string_view& err)
+    -> ParserError {
   if (token.type == TokenType::EOF) {
     report(token.line, " at end", err);
   } else {

@@ -95,12 +95,33 @@ auto Interpreter::operator()(const UnaryExprPtr& expr) -> lox_literal {
   }
 }
 
-auto Interpreter::interpret(const Expr& expr) -> void {
+auto Interpreter::operator()(const VariablePtr&) -> lox_literal {
+  // TODO: Not implemented
+  return lox_literal();
+}
+
+auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {
+  visit(*this, stmt->expression_m);
+}
+
+auto Interpreter::operator()(const PrintPtr& stmt) -> void {
+  lox_literal value = visit(*this, stmt->expression_m);
+  fmt::print("{}\n", value);
+}
+
+auto Interpreter::operator()(const VarPtr&) -> void {
+  // TODO: Not implemented
+}
+
+auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
   try {
-    auto result = visit<lox_literal>(*this, expr);
-    fmt::print("{}\n", result);
+    for (const auto& stmt : stmts) {
+      visit(*this, stmt);
+    }
+    return true;
   } catch (const RuntimeError& err) {
     report_error(err);
+    return false;
   }
 }
 

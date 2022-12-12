@@ -60,8 +60,7 @@ auto define_ast(const std::filesystem::path& filepath,
   std::ofstream out{filepath, std::ios_base::out};
 
   out << fmt::format("#ifndef LOXALONE_{}_H\n", base)
-      << fmt::format("#define LOXALONE_{}_H\n\n", base)
-      << "#include <memory>\n"
+      << fmt::format("#define LOXALONE_{}_H\n\n", base) << "#include <memory>\n"
       << "#include <string>\n"
       << "#include <variant>\n\n"
       << "#include \"Token.h\"\n\n";
@@ -143,9 +142,10 @@ int main(int argc, char** argv) {
       filepath / "Expr.h", "Expr",
       {"BinaryExpr   : Expr left, Token oper, Expr right",
        "GroupingExpr : Expr expression", "LiteralVal : lox_literal value",
-       "UnaryExpr    : Token oper, Expr right"},
+       "UnaryExpr    : Token oper, Expr right", "Variable : Token name"},
       {});
   define_ast(filepath / "Stmt.h", "Stmt",
-             {"Expression : Expr expression", "Print : Expr expression"},
+             {"Expression : Expr expression", "Print : Expr expression",
+              "Var : Token name, Expr initializer"},
              {"Expr.h"});
 }

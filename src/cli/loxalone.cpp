@@ -12,24 +12,19 @@ const auto USAGE = "Usage: loxalone [script]";
 
 // Probably should return result rather than boolean
 // And also each line is run once here, the interpreter probably needs to
-// maintain internal state (e.g variables set, classes defined, etc.)
+// maintain internal state (e.g. variables set, classes defined, etc.)
 // and probably needs to move the run function out of this
-auto run(const std::string_view& source) -> bool {
+auto run(Interpreter& interpreter, const std::string_view& source) -> bool {
   Scanner scanner{source};
-  std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
 
+  std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
   if (!tokens.has_value())
     return false;
 
   Parser parser{tokens.value()};
-  std::optional<Expr> expression = parser.parse();
+  std::vector<Stmt> statements = parser.parse();
 
-  if (!expression.has_value())
-    return false;
-
-  Interpreter interpreter{};
-  interpreter.interpret(expression.value());
-  return true;
+  return interpreter.interpret(statements);
 }
 
 auto run_file(const std::string_view& file) -> int {
@@ -37,6 +32,7 @@ auto run_file(const std::string_view& file) -> int {
 }
 
 auto run_prompt() -> int {
+  Interpreter interpreter{};
   std::string input;
 
   while (true) {
@@ -44,7 +40,7 @@ auto run_prompt() -> int {
     std::getline(std::cin, input);
 
     if (input.length() > 0) {
-      run(input);
+      run(interpreter, input);
     }
   }
 }

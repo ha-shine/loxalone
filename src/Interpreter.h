@@ -6,8 +6,10 @@
 #define LOXALONE_INTERPRETER_H
 
 #include <utility>
+#include <vector>
 
 #include "Expr.h"
+#include "Stmt.h"
 #include "Token.h"
 
 class RuntimeError : std::exception {
@@ -21,11 +23,21 @@ class RuntimeError : std::exception {
 
 class Interpreter {
  public:
+  // Expression visitor
   auto operator()(const BinaryExprPtr&) -> lox_literal;
   auto operator()(const GroupingExprPtr&) -> lox_literal;
   auto operator()(const LiteralValPtr&) -> lox_literal;
   auto operator()(const UnaryExprPtr&) -> lox_literal;
-  auto interpret(const Expr&) -> void;
+  auto operator()(const VariablePtr&) -> lox_literal;
+
+  // Statement visitors
+  auto operator()(const ExpressionPtr&) -> void;
+  auto operator()(const PrintPtr&) -> void;
+  auto operator()(const VarPtr&) -> void;
+
+  // Entry point for interpreter, returns true if it's successful
+  // or false if there's a runtime error
+  auto interpret(const std::vector<Stmt>&) -> bool;
 
  private:
   auto check_is_number(const Token&, const lox_literal&) -> void;
@@ -34,5 +46,6 @@ class Interpreter {
 };
 
 static_assert(ExprVisitor<Interpreter, lox_literal>);
+static_assert(StmtVisitor<Interpreter, void>);
 
 #endif  //LOXALONE_INTERPRETER_H

@@ -40,10 +40,14 @@ Lowest to highest
 
 Each rule matches expression at its precedence level or higher.
 The rules are made intentionally to be right-recursive.
+Terminals are in capital letters.
 
 ```
 
-- program           -> statement* EOF ;
+- program           -> declaration* EOF ;
+- declaration       -> var_decl
+                     | statement ;
+- var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
                      | print_statement ;
 - expr_statement    -> expression ";" ;
@@ -55,7 +59,8 @@ The rules are made intentionally to be right-recursive.
 - factor            -> unary ( ("/" | "*") unary )*;
 - unary             -> ("!" | "-") unary | primary;
 - primary           -> NUMBER | STRING | "true" | "false" | "nil"
-                     | "(" expression ")";
+                     | "(" expression ")"
+                     | IDENTIFIER ;
 
 ```
 
