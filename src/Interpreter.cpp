@@ -123,13 +123,26 @@ auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
   return value;
 }
 
+auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
+  lox_literal left = visit(*this, expr->left_m);
+  check_is_boolean(expr->oper_m, left);
+  if (expr->oper_m.type == TokenType::OR) {
+    if (std::get<bool>(left))
+      return true;
+  } else {
+    if (!std::get<bool>(left))
+      return false;
+  }
+  return visit(*this, expr->right_m);
+}
+
 auto Interpreter::operator()(const BlockPtr& stmt) -> void {
   Environment previous = std::move(env);
 
   // Dumb RAII handler to restore the parent's scope after exit
   std::shared_ptr<std::monostate> cleaner{nullptr, [&](std::monostate* ptr) {
-    env = std::move(previous);
-  }};
+                                            env = std::move(previous);
+                                          }};
 
   env = Environment{&previous};
   for (const auto& statement : stmt->statements_m) {
@@ -151,6 +164,19 @@ auto Interpreter::operator()(const VarPtr& stmt) -> void {
   env.define(stmt->name_m.lexeme, val);
 }
 
+auto Interpreter::operator()(const IfPtr& stmt) -> void {
+  lox_literal condition = visit(*this, stmt->expression_m);
+  if (!std::holds_alternative<bool>(condition))
+    throw RuntimeError{stmt->token_m,
+                       "If condition must be a boolean expression."};
+
+  if (std::get<bool>(condition)) {
+    visit(*this, stmt->then_branch_m);
+  } else {
+    visit(*this, stmt->else_branch_m);
+  }
+}
+
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
   try {
     for (const auto& stmt : stmts) {
@@ -169,8 +195,8 @@ auto Interpreter::check_is_number(const Token& oper, const lox_literal& operand)
     throw RuntimeError{oper, "Operand must be a number."};
 }
 
-auto Interpreter::check_is_boolean(const Token& oper, const lox_literal& operand)
-    -> void {
+auto Interpreter::check_is_boolean(const Token& oper,
+                                   const lox_literal& operand) -> void {
   if (!std::holds_alternative<bool>(operand))
     throw RuntimeError{oper, "Operand must be a boolean."};
 }

@@ -35,6 +35,7 @@ class Parser {
   auto declaration() -> Stmt;
   auto var_declaration() -> Stmt;
   auto statement() -> Stmt;
+  auto if_statement() -> Stmt;
   auto print_statement() -> Stmt;
   auto expression_statement() -> Stmt;
 
@@ -45,6 +46,8 @@ class Parser {
   // Expression parsing functions
   auto expression() -> Expr;
   auto assignment() -> Expr;
+  auto or_expression() -> Expr;
+  auto and_expression() -> Expr;
   auto equality() -> Expr;
   auto comparison() -> Expr;
   auto term() -> Expr;

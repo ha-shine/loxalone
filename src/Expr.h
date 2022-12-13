@@ -11,6 +11,7 @@ class Assign;
 class BinaryExpr;
 class GroupingExpr;
 class LiteralVal;
+class Logical;
 class UnaryExpr;
 class Variable;
 
@@ -18,23 +19,26 @@ using AssignPtr = std::unique_ptr<Assign>;
 using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
 using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
 using LiteralValPtr = std::unique_ptr<LiteralVal>;
+using LogicalPtr = std::unique_ptr<Logical>;
 using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
 using VariablePtr = std::unique_ptr<Variable>;
 
 using Expr = std::variant<AssignPtr, BinaryExprPtr, GroupingExprPtr,
-                          LiteralValPtr, UnaryExprPtr, VariablePtr>;
+                          LiteralValPtr, LogicalPtr, UnaryExprPtr, VariablePtr>;
 
 template <typename V, typename Out>
 concept ExprVisitor =
     requires(V v, const AssignPtr& arg_0, const BinaryExprPtr& arg_1,
              const GroupingExprPtr& arg_2, const LiteralValPtr& arg_3,
-             const UnaryExprPtr& arg_4, const VariablePtr& arg_5) {
+             const LogicalPtr& arg_4, const UnaryExprPtr& arg_5,
+             const VariablePtr& arg_6) {
   { v(arg_0) } -> std::convertible_to<Out>;
   { v(arg_1) } -> std::convertible_to<Out>;
   { v(arg_2) } -> std::convertible_to<Out>;
   { v(arg_3) } -> std::convertible_to<Out>;
   { v(arg_4) } -> std::convertible_to<Out>;
   { v(arg_5) } -> std::convertible_to<Out>;
+  { v(arg_6) } -> std::convertible_to<Out>;
 };
 
 class Assign {
@@ -75,6 +79,19 @@ class LiteralVal {
 
   explicit LiteralVal(lox_literal&& value) : value_m{std::move(value)} {}
   ~LiteralVal() = default;
+};
+
+class Logical {
+ public:
+  const Expr left_m;
+  const Token oper_m;
+  const Expr right_m;
+
+  Logical(Expr&& left, Token&& oper, Expr&& right)
+      : left_m{std::move(left)},
+        oper_m{std::move(oper)},
+        right_m{std::move(right)} {}
+  ~Logical() = default;
 };
 
 class UnaryExpr {

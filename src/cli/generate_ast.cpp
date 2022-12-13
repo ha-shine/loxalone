@@ -143,11 +143,13 @@ int main(int argc, char** argv) {
       {"Assign       - Token name, Expr value",
        "BinaryExpr   - Expr left, Token oper, Expr right",
        "GroupingExpr - Expr expression", "LiteralVal - lox_literal value",
+       "Logical - Expr left, Token oper, Expr right",
        "UnaryExpr    - Token oper, Expr right", "Variable - Token name"},
       {});
   define_ast(
       filepath / "Stmt.h", "Stmt",
       {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
+       "If - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
        "Print - Expr expression", "Var - Token name, Expr initializer"},
       {"Expr.h"});
 }

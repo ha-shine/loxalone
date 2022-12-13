@@ -51,12 +51,19 @@ Terminals are in capital letters.
                      | statement ;
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
+                     | if_statement
                      | print_statement 
                      | block ;
+- if_statement      -> "if" "(" expression ")" statement
+                       ( "else" statement )? ;
 - block             -> "{" declaration* "}" ;
 - expr_statement    -> expression ";" ;
 - print_statement   -> "print" expression ";" ;
-- expression        -> equality;
+- expression        -> assignment ;
+- assignment        -> IDENTIFIER "=" assignment
+                     | logic_or ;
+- logic_or          -> logic_and ( "or" logic_and )* ;
+- logic_and         -> equality ( "and" equality )* ;
 - equality          -> comparison ( ("==" | "!=") comparison )*;
 - comparison        -> term ( (">" | ">=" | "<" | "<=") term )*;
 - term              -> factor ( ("+" | "-") factor )*;

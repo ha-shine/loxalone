@@ -17,11 +17,13 @@ class PrettyPrinter {
   auto operator()(const UnaryExprPtr&) -> std::string;
   auto operator()(const VariablePtr&) -> std::string;
   auto operator()(const AssignPtr&) -> std::string;
+  auto operator()(const LogicalPtr&) -> std::string;
 
  private:
   // TODO: Can these two be written with variadic template?
   auto parenthesize(const std::string_view&, const Expr&) -> std::string;
-  auto parenthesize(const std::string_view&, const Expr&, const Expr&) -> std::string;
+  auto parenthesize(const std::string_view&, const Expr&, const Expr&)
+      -> std::string;
 };
 
 static_assert(ExprVisitor<PrettyPrinter, std::string>);

@@ -46,3 +46,9 @@ auto PrettyPrinter::operator()(const AssignPtr& expr) -> std::string {
   return fmt::format("(assign {}={})", expr->name_m.lexeme,
                      visit(*this, expr->value_m));
 }
+
+auto PrettyPrinter::operator()(const LogicalPtr& expr) -> std::string {
+  return fmt::format("({} {} {})", tt_to_string(expr->oper_m.type),
+                     visit(*this, expr->left_m),
+                     std::visit(*this, expr->right_m));
+}

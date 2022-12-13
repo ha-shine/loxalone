@@ -43,6 +43,8 @@ auto Parser::var_declaration() -> Stmt {
 }
 
 auto Parser::statement() -> Stmt {
+  if (match(TokenType::IF))
+    return if_statement();
   if (match(TokenType::PRINT))
     return print_statement();
   if (match(TokenType::LEFT_BRACE))
@@ -51,13 +53,20 @@ auto Parser::statement() -> Stmt {
   return expression_statement();
 }
 
-auto Parser::block() -> std::vector<Stmt> {
-  std::vector<Stmt> statements{};
-  while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
-    statements.emplace_back(declaration());
-  }
-  consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
-  return statements;
+auto Parser::if_statement() -> Stmt {
+  const Token& token = previous();
+  consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+  Expr condition = expression();
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+  Stmt then_branch = statement();
+  Stmt else_branch = Stmt{std::unique_ptr<Block>(nullptr)};
+  if (match(TokenType::ELSE))
+    else_branch = statement();
+
+  return Stmt{std::make_unique<If>(std::move(condition), Token{token},
+                                   std::move(then_branch),
+                                   std::move(else_branch))};
 }
 
 auto Parser::print_statement() -> Stmt {
@@ -72,12 +81,21 @@ auto Parser::expression_statement() -> Stmt {
   return Stmt{std::make_unique<Expression>(std::move(expr))};
 }
 
+auto Parser::block() -> std::vector<Stmt> {
+  std::vector<Stmt> statements{};
+  while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
+    statements.emplace_back(declaration());
+  }
+  consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+  return statements;
+}
+
 auto Parser::expression() -> Expr {
   return assignment();
 }
 
 auto Parser::assignment() -> Expr {
-  Expr expr = equality();
+  Expr expr = or_expression();
 
   if (match(TokenType::EQUAL)) {
     const Token& equals = previous();
@@ -91,6 +109,28 @@ auto Parser::assignment() -> Expr {
     parser_error(equals, "Invalid assignment target.");
   }
 
+  return expr;
+}
+
+auto Parser::or_expression() -> Expr {
+  Expr expr = and_expression();
+  while (match(TokenType::OR)) {
+    const Token& oper = previous();
+    Expr right = and_expression();
+    expr = Expr{std::make_unique<Logical>(std::move(expr), Token{oper},
+                                          std::move(right))};
+  }
+  return expr;
+}
+
+auto Parser::and_expression() -> Expr {
+  Expr expr = equality();
+  while (match(TokenType::AND)) {
+    const Token& oper = previous();
+    Expr right = equality();
+    expr = Expr{std::make_unique<Logical>(std::move(expr), Token{oper},
+                                          std::move(right))};
+  }
   return expr;
 }
 

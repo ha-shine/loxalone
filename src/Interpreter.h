@@ -25,12 +25,14 @@ class Interpreter {
   auto operator()(const UnaryExprPtr&) -> lox_literal;
   auto operator()(const VariablePtr&) -> lox_literal;
   auto operator()(const AssignPtr&) -> lox_literal;
+  auto operator()(const LogicalPtr&) -> lox_literal;
 
   // Statement visitors
   auto operator()(const BlockPtr&) -> void;
   auto operator()(const ExpressionPtr&) -> void;
   auto operator()(const PrintPtr&) -> void;
   auto operator()(const VarPtr&) -> void;
+  auto operator()(const IfPtr&) -> void;
 
   // Entry point for interpreter, returns true if it's successful
   // or false if there's a runtime error
