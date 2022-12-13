@@ -34,6 +34,7 @@ auto Environment::assign(const Token& token, lox_literal val) -> void {
   }
   if (enclosing != nullptr) {
     enclosing->assign(token, std::move(val));
+    return;
   }
 
   throw RuntimeError{token,

@@ -49,6 +49,8 @@ auto Parser::statement() -> Stmt {
     return print_statement();
   if (match(TokenType::WHILE))
     return while_statement();
+  if (match(TokenType::FOR))
+    return for_statement();
   if (match(TokenType::LEFT_BRACE))
     return Stmt{std::make_unique<Block>(block())};
 
@@ -85,6 +87,62 @@ auto Parser::while_statement() -> Stmt {
   Stmt body = statement();
   return Stmt{std::make_unique<While>(std::move(condition), std::move(body),
                                       Token{token})};
+}
+
+auto Parser::for_statement() -> Stmt {
+  const Token& token = previous();
+
+  consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+  Stmt initializer{};
+  if (match(TokenType::SEMICOLON)) {
+    initializer = Stmt{std::unique_ptr<Var>(nullptr)};
+  } else if (match(TokenType::VAR)) {
+    initializer = var_declaration();
+  } else {
+    initializer = expression_statement();
+  }
+
+  Expr condition{};
+  if (!check(TokenType::SEMICOLON)) {
+    condition = expression();
+  }
+  consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+  Expr increment{};
+  if (!check(TokenType::RIGHT_PAREN)) {
+    increment = expression();
+  }
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+  // The body of the for loop
+  std::vector<Stmt> stmts{};
+  stmts.emplace_back(statement());
+
+  // If the increment expression is not null, add it to the end of body
+  if (!expr_is_null(increment))
+    stmts.emplace_back(std::make_unique<Expression>(std::move(increment)));
+
+  // The for loop's body is a list of statement with increment expression
+  // added at the end
+  Stmt body = Stmt{std::make_unique<Block>(std::move(stmts))};
+
+  // If the condition expression is null, use `true` literal (an infinite loop)
+  if (expr_is_null(condition))
+    condition = Expr{std::make_unique<LiteralVal>(true)};
+
+  // De-sugar for loop into a while loop with the condition.
+  body = Stmt{std::make_unique<While>(std::move(condition), std::move(body),
+                                      Token{token})};
+
+  // The initializer needs to be executed first before looping
+  if (!stmt_is_null(initializer)) {
+    std::vector<Stmt> block{};
+    block.emplace_back(std::move(initializer));
+    block.emplace_back(std::move(body));
+    body = Stmt{std::make_unique<Block>(std::move(block))};
+  }
+
+  return body;
 }
 
 auto Parser::expression_statement() -> Stmt {

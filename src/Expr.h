@@ -26,6 +26,24 @@ using VariablePtr = std::unique_ptr<Variable>;
 using Expr = std::variant<AssignPtr, BinaryExprPtr, GroupingExprPtr,
                           LiteralValPtr, LogicalPtr, UnaryExprPtr, VariablePtr>;
 
+static auto expr_is_null(const Expr& expr) {
+  if (std::holds_alternative<AssignPtr>(expr))
+    return std::get<AssignPtr>(expr) == nullptr;
+  if (std::holds_alternative<BinaryExprPtr>(expr))
+    return std::get<BinaryExprPtr>(expr) == nullptr;
+  if (std::holds_alternative<GroupingExprPtr>(expr))
+    return std::get<GroupingExprPtr>(expr) == nullptr;
+  if (std::holds_alternative<LiteralValPtr>(expr))
+    return std::get<LiteralValPtr>(expr) == nullptr;
+  if (std::holds_alternative<LogicalPtr>(expr))
+    return std::get<LogicalPtr>(expr) == nullptr;
+  if (std::holds_alternative<UnaryExprPtr>(expr))
+    return std::get<UnaryExprPtr>(expr) == nullptr;
+  if (std::holds_alternative<VariablePtr>(expr))
+    return std::get<VariablePtr>(expr) == nullptr;
+  return false;
+}
+
 template <typename V, typename Out>
 concept ExprVisitor =
     requires(V v, const AssignPtr& arg_0, const BinaryExprPtr& arg_1,

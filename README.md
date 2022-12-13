@@ -51,10 +51,14 @@ Terminals are in capital letters.
                      | statement ;
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
+                     | for_statement
                      | if_statement
                      | print_statement
                      | while_statement 
                      | block ;
+- for_statement     -> "for" "(" ( var_decl | expr_statement | ";" )
+                       expression? ";"
+                       expression? ")" statement ;
 - if_statement      -> "if" "(" expression ")" statement
                        ( "else" statement )? ;
 - block             -> "{" declaration* "}" ;
@@ -85,3 +89,4 @@ Terminals are in capital letters.
 - `+` operator currently only concatenates or add numbers. Extend it to allow concatenating a number to a string
 - REPL no longer supports entering single expression, it can be convenient for the user to be able to type expressions
   and see the results
+- Add `break` and `continue` statement inside loops

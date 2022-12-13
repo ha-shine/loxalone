@@ -118,12 +118,16 @@ auto Interpreter::operator()(const VariablePtr& expr) -> lox_literal {
 }
 
 auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
   lox_literal value = visit(*this, expr->value_m);
   env.assign(expr->name_m, value);
   return value;
 }
 
 auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
+  if (!expr)
+    return std::monostate{};
   lox_literal left = visit(*this, expr->left_m);
   check_is_boolean(expr->oper_m, left);
   if (expr->oper_m.type == TokenType::OR) {
@@ -137,6 +141,9 @@ auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
 }
 
 auto Interpreter::operator()(const BlockPtr& stmt) -> void {
+  if (!stmt)
+    return;
+
   Environment previous = std::move(env);
 
   // Dumb RAII handler to restore the parent's scope after exit
@@ -151,20 +158,28 @@ auto Interpreter::operator()(const BlockPtr& stmt) -> void {
 }
 
 auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {
+  if (!stmt)
+    return;
   visit(*this, stmt->expression_m);
 }
 
 auto Interpreter::operator()(const PrintPtr& stmt) -> void {
+  if (!stmt)
+    return;
   lox_literal value = visit(*this, stmt->expression_m);
-  fmt::print("{}\n", value);
+  fmt::print("{}", value);
 }
 
 auto Interpreter::operator()(const VarPtr& stmt) -> void {
+  if (!stmt)
+    return;
   lox_literal val = visit(*this, stmt->initializer_m);
   env.define(stmt->name_m.lexeme, val);
 }
 
 auto Interpreter::operator()(const IfPtr& stmt) -> void {
+  if (!stmt)
+    return;
   lox_literal condition = visit(*this, stmt->expression_m);
   if (!std::holds_alternative<bool>(condition))
     throw RuntimeError{stmt->token_m,
@@ -183,8 +198,13 @@ auto Interpreter::operator()(const WhilePtr& stmt) -> void {
     throw RuntimeError{stmt->token_m,
                        "While condition must be a boolean expression."};
 
-  while (std::get<bool>(condition))
+  while (std::get<bool>(condition)) {
     visit(*this, stmt->body_m);
+    condition = std::visit(*this, stmt->condition_m);
+    if (!std::holds_alternative<bool>(condition))
+      throw RuntimeError{stmt->token_m,
+                         "While condition must be a boolean expression."};
+  }
 }
 
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {

@@ -26,6 +26,22 @@ using VarPtr = std::unique_ptr<Var>;
 using Stmt =
     std::variant<BlockPtr, ExpressionPtr, IfPtr, WhilePtr, PrintPtr, VarPtr>;
 
+static auto stmt_is_null(const Stmt& stmt) {
+  if (std::holds_alternative<BlockPtr>(stmt))
+    return std::get<BlockPtr>(stmt) == nullptr;
+  if (std::holds_alternative<ExpressionPtr>(stmt))
+    return std::get<ExpressionPtr>(stmt) == nullptr;
+  if (std::holds_alternative<IfPtr>(stmt))
+    return std::get<IfPtr>(stmt) == nullptr;
+  if (std::holds_alternative<WhilePtr>(stmt))
+    return std::get<WhilePtr>(stmt) == nullptr;
+  if (std::holds_alternative<PrintPtr>(stmt))
+    return std::get<PrintPtr>(stmt) == nullptr;
+  if (std::holds_alternative<VarPtr>(stmt))
+    return std::get<VarPtr>(stmt) == nullptr;
+  return false;
+}
+
 template <typename V, typename Out>
 concept StmtVisitor = requires(
     V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1, const IfPtr& arg_2,

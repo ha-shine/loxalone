@@ -105,6 +105,18 @@ auto define_ast(const std::filesystem::path& filepath,
   }
   out << ">;\n\n";
 
+  // define base_is_null function for pointers
+  out << fmt::format("static auto {}_is_null(const {}& {}) {{\n", to_lowercase(base),
+                     base, to_lowercase(base));
+  for (auto& clz : classes) {
+    out << fmt::format("  if (std::holds_alternative<{}Ptr>({}))\n", clz.name,
+                       to_lowercase(base))
+        << fmt::format("    return std::get<{}Ptr>({}) == nullptr;\n", clz.name,
+                       to_lowercase(base));
+  }
+  out << "  return false;\n"
+      << "}\n\n";
+
   // define Visitor concept so callers can static_assert their type to ensure
   // the visitor classes are compliant, ie define all required methods
   out << "template <typename V, typename Out>\n"
@@ -150,7 +162,7 @@ int main(int argc, char** argv) {
       filepath / "Stmt.h", "Stmt",
       {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
        "If - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
-       "While - Expr condition, Stmt body, Token token", "Print - Expr expression",
-       "Var - Token name, Expr initializer"},
+       "While - Expr condition, Stmt body, Token token",
+       "Print - Expr expression", "Var - Token name, Expr initializer"},
       {"Expr.h"});
 }

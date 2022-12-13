@@ -38,6 +38,7 @@ class Parser {
   auto if_statement() -> Stmt;
   auto print_statement() -> Stmt;
   auto while_statement() -> Stmt;
+  auto for_statement() -> Stmt;
   auto expression_statement() -> Stmt;
 
   // This returns a list of block instead of statement because this
