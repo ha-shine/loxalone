@@ -177,6 +177,16 @@ auto Interpreter::operator()(const IfPtr& stmt) -> void {
   }
 }
 
+auto Interpreter::operator()(const WhilePtr& stmt) -> void {
+  lox_literal condition = std::visit(*this, stmt->condition_m);
+  if (!std::holds_alternative<bool>(condition))
+    throw RuntimeError{stmt->token_m,
+                       "While condition must be a boolean expression."};
+
+  while (std::get<bool>(condition))
+    visit(*this, stmt->body_m);
+}
+
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
   try {
     for (const auto& stmt : stmts) {

@@ -52,13 +52,15 @@ Terminals are in capital letters.
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
                      | if_statement
-                     | print_statement 
+                     | print_statement
+                     | while_statement 
                      | block ;
 - if_statement      -> "if" "(" expression ")" statement
                        ( "else" statement )? ;
 - block             -> "{" declaration* "}" ;
 - expr_statement    -> expression ";" ;
 - print_statement   -> "print" expression ";" ;
+- while_statement   -> "while" "(" expression ")" statement ;
 - expression        -> assignment ;
 - assignment        -> IDENTIFIER "=" assignment
                      | logic_or ;

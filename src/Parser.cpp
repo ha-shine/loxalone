@@ -47,6 +47,8 @@ auto Parser::statement() -> Stmt {
     return if_statement();
   if (match(TokenType::PRINT))
     return print_statement();
+  if (match(TokenType::WHILE))
+    return while_statement();
   if (match(TokenType::LEFT_BRACE))
     return Stmt{std::make_unique<Block>(block())};
 
@@ -73,6 +75,16 @@ auto Parser::print_statement() -> Stmt {
   Expr expr = expression();
   consume(TokenType::SEMICOLON, "Expect ';' after value.");
   return Stmt{std::make_unique<Print>(std::move(expr))};
+}
+
+auto Parser::while_statement() -> Stmt {
+  const Token& token = previous();
+  consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+  Expr condition = expression();
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after while condition.");
+  Stmt body = statement();
+  return Stmt{std::make_unique<While>(std::move(condition), std::move(body),
+                                      Token{token})};
 }
 
 auto Parser::expression_statement() -> Stmt {

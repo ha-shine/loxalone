@@ -12,26 +12,30 @@
 class Block;
 class Expression;
 class If;
+class While;
 class Print;
 class Var;
 
 using BlockPtr = std::unique_ptr<Block>;
 using ExpressionPtr = std::unique_ptr<Expression>;
 using IfPtr = std::unique_ptr<If>;
+using WhilePtr = std::unique_ptr<While>;
 using PrintPtr = std::unique_ptr<Print>;
 using VarPtr = std::unique_ptr<Var>;
 
-using Stmt = std::variant<BlockPtr, ExpressionPtr, IfPtr, PrintPtr, VarPtr>;
+using Stmt =
+    std::variant<BlockPtr, ExpressionPtr, IfPtr, WhilePtr, PrintPtr, VarPtr>;
 
 template <typename V, typename Out>
-concept StmtVisitor =
-    requires(V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1,
-             const IfPtr& arg_2, const PrintPtr& arg_3, const VarPtr& arg_4) {
+concept StmtVisitor = requires(
+    V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1, const IfPtr& arg_2,
+    const WhilePtr& arg_3, const PrintPtr& arg_4, const VarPtr& arg_5) {
   { v(arg_0) } -> std::convertible_to<Out>;
   { v(arg_1) } -> std::convertible_to<Out>;
   { v(arg_2) } -> std::convertible_to<Out>;
   { v(arg_3) } -> std::convertible_to<Out>;
   { v(arg_4) } -> std::convertible_to<Out>;
+  { v(arg_5) } -> std::convertible_to<Out>;
 };
 
 class Block {
@@ -65,6 +69,19 @@ class If {
         then_branch_m{std::move(then_branch)},
         else_branch_m{std::move(else_branch)} {}
   ~If() = default;
+};
+
+class While {
+ public:
+  const Expr condition_m;
+  const Stmt body_m;
+  const Token token_m;
+
+  While(Expr&& condition, Stmt&& body, Token&& token)
+      : condition_m{std::move(condition)},
+        body_m{std::move(body)},
+        token_m{std::move(token)} {}
+  ~While() = default;
 };
 
 class Print {

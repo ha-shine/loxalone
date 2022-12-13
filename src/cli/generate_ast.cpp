@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
       filepath / "Stmt.h", "Stmt",
       {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
        "If - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
-       "Print - Expr expression", "Var - Token name, Expr initializer"},
+       "While - Expr condition, Stmt body, Token token", "Print - Expr expression",
+       "Var - Token name, Expr initializer"},
       {"Expr.h"});
 }
