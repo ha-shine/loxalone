@@ -4,6 +4,8 @@
 
 #include "Interpreter.h"
 
+#include <memory>
+
 // Report runtime scanner_error by printing to stderr
 auto report_error(const RuntimeError& err) -> void {
   fmt::print(stderr, "{}\n[line {}]", err.msg, err.token.line);
@@ -119,6 +121,20 @@ auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
   lox_literal value = visit(*this, expr->value_m);
   env.assign(expr->name_m, value);
   return value;
+}
+
+auto Interpreter::operator()(const BlockPtr& stmt) -> void {
+  Environment previous = std::move(env);
+
+  // Dumb RAII handler to restore the parent's scope after exit
+  std::shared_ptr<std::monostate> cleaner{nullptr, [&](std::monostate* ptr) {
+    env = std::move(previous);
+  }};
+
+  env = Environment{&previous};
+  for (const auto& statement : stmt->statements_m) {
+    visit(*this, statement);
+  }
 }
 
 auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {

@@ -45,8 +45,19 @@ auto Parser::var_declaration() -> Stmt {
 auto Parser::statement() -> Stmt {
   if (match(TokenType::PRINT))
     return print_statement();
+  if (match(TokenType::LEFT_BRACE))
+    return Stmt{std::make_unique<Block>(block())};
 
   return expression_statement();
+}
+
+auto Parser::block() -> std::vector<Stmt> {
+  std::vector<Stmt> statements{};
+  while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
+    statements.emplace_back(declaration());
+  }
+  consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+  return statements;
 }
 
 auto Parser::print_statement() -> Stmt {

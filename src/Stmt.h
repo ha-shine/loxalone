@@ -9,22 +9,35 @@
 
 #include "Expr.h"
 
+class Block;
 class Expression;
 class Print;
 class Var;
 
+using BlockPtr = std::unique_ptr<Block>;
 using ExpressionPtr = std::unique_ptr<Expression>;
 using PrintPtr = std::unique_ptr<Print>;
 using VarPtr = std::unique_ptr<Var>;
 
-using Stmt = std::variant<ExpressionPtr, PrintPtr, VarPtr>;
+using Stmt = std::variant<BlockPtr, ExpressionPtr, PrintPtr, VarPtr>;
 
 template <typename V, typename Out>
-concept StmtVisitor = requires(V v, const ExpressionPtr& arg_0,
-                               const PrintPtr& arg_1, const VarPtr& arg_2) {
+concept StmtVisitor =
+    requires(V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1,
+             const PrintPtr& arg_2, const VarPtr& arg_3) {
   { v(arg_0) } -> std::convertible_to<Out>;
   { v(arg_1) } -> std::convertible_to<Out>;
   { v(arg_2) } -> std::convertible_to<Out>;
+  { v(arg_3) } -> std::convertible_to<Out>;
+};
+
+class Block {
+ public:
+  const std::vector<Stmt> statements_m;
+
+  explicit Block(std::vector<Stmt>&& statements)
+      : statements_m{std::move(statements)} {}
+  ~Block() = default;
 };
 
 class Expression {

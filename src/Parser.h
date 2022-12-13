@@ -38,6 +38,10 @@ class Parser {
   auto print_statement() -> Stmt;
   auto expression_statement() -> Stmt;
 
+  // This returns a list of block instead of statement because this
+  // will be reused in other parsing, e.g. functions.
+  auto block() -> std::vector<Stmt>;
+
   // Expression parsing functions
   auto expression() -> Expr;
   auto assignment() -> Expr;

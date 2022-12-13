@@ -72,7 +72,7 @@ auto define_ast(const std::filesystem::path& filepath,
 
   std::vector<Class> classes{};
   for (const auto& type : types) {
-    std::vector parts = split(type, ':');
+    std::vector parts = split(type, '-');
     std::string_view name = trim(parts[0]), fields_string = trim(parts[1]);
 
     std::vector<Field> fields{};
@@ -140,13 +140,14 @@ int main(int argc, char** argv) {
 
   define_ast(
       filepath / "Expr.h", "Expr",
-      {"Assign : Token name, Expr value",
-       "BinaryExpr   : Expr left, Token oper, Expr right",
-       "GroupingExpr : Expr expression", "LiteralVal : lox_literal value",
-       "UnaryExpr    : Token oper, Expr right", "Variable : Token name"},
+      {"Assign       - Token name, Expr value",
+       "BinaryExpr   - Expr left, Token oper, Expr right",
+       "GroupingExpr - Expr expression", "LiteralVal - lox_literal value",
+       "UnaryExpr    - Token oper, Expr right", "Variable - Token name"},
       {});
-  define_ast(filepath / "Stmt.h", "Stmt",
-             {"Expression : Expr expression", "Print : Expr expression",
-              "Var : Token name, Expr initializer"},
-             {"Expr.h"});
+  define_ast(
+      filepath / "Stmt.h", "Stmt",
+      {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
+       "Print - Expr expression", "Var - Token name, Expr initializer"},
+      {"Expr.h"});
 }

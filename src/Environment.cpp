@@ -15,18 +15,25 @@ auto Environment::define(const std::string_view& key, lox_literal val) -> void {
 
 auto Environment::get(const Token& token) -> const lox_literal& {
   auto ptr = values.find(token.lexeme);
-  if (ptr == values.end()) {
-    throw RuntimeError{token,
-                       fmt::format("Undefined variable '{}'.", token.lexeme)};
+  if (ptr != values.end()) {
+    return ptr->second;
+  }
+  if (enclosing != nullptr) {
+    return enclosing->get(token);
   }
 
-  return ptr->second;
+  throw RuntimeError{token,
+                     fmt::format("Undefined variable '{}'.", token.lexeme)};
 }
 
 auto Environment::assign(const Token& token, lox_literal val) -> void {
-  if (values.find(token.lexeme) != values.end()) {
-    values[token.lexeme] = std::move(val);
+  auto ptr = values.find(token.lexeme);
+  if (ptr != values.end()) {
+    ptr->second = std::move(val);
     return;
+  }
+  if (enclosing != nullptr) {
+    enclosing->assign(token, std::move(val));
   }
 
   throw RuntimeError{token,

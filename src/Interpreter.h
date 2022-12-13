@@ -27,6 +27,7 @@ class Interpreter {
   auto operator()(const AssignPtr&) -> lox_literal;
 
   // Statement visitors
+  auto operator()(const BlockPtr&) -> void;
   auto operator()(const ExpressionPtr&) -> void;
   auto operator()(const PrintPtr&) -> void;
   auto operator()(const VarPtr&) -> void;

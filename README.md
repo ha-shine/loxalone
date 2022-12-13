@@ -51,7 +51,9 @@ Terminals are in capital letters.
                      | statement ;
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
-                     | print_statement ;
+                     | print_statement 
+                     | block ;
+- block             -> "{" declaration* "}" ;
 - expr_statement    -> expression ";" ;
 - print_statement   -> "print" expression ";" ;
 - expression        -> equality;
@@ -72,3 +74,5 @@ Terminals are in capital letters.
 - `--verbose` parameter in CLI prompt for extra statistics (like execution time, etc.)
 - Handle divide by 0 error
 - `+` operator currently only concatenates or add numbers. Extend it to allow concatenating a number to a string
+- REPL no longer supports entering single expression, it can be convenient for the user to be able to type expressions
+  and see the results
