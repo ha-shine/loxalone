@@ -4,24 +4,23 @@
 
 #include "PrettyPrinter.h"
 
-#include <sstream>
 #include "Token.h"
 
-auto PrettyPrinter::operator()(const BinaryExprPtr& expr) -> std::string {
+auto PrettyPrinter::operator()(const BinaryPtr& expr) -> std::string {
   return parenthesize(expr->oper_m.lexeme, expr->left_m, expr->right_m);
 }
 
-auto PrettyPrinter::operator()(const GroupingExprPtr& expr) -> std::string {
+auto PrettyPrinter::operator()(const GroupingPtr& expr) -> std::string {
   return parenthesize("group", expr->expression_m);
 }
 
-auto PrettyPrinter::operator()(const LiteralValPtr& expr) -> std::string {
+auto PrettyPrinter::operator()(const LiteralPtr& expr) -> std::string {
   return std::visit(
       [](auto&& arg) -> std::string { return fmt::format("{}", arg); },
       expr->value_m);
 }
 
-auto PrettyPrinter::operator()(const UnaryExprPtr& expr) -> std::string {
+auto PrettyPrinter::operator()(const UnaryPtr& expr) -> std::string {
   return parenthesize(expr->oper_m.lexeme, expr->right_m);
 }
 
@@ -51,4 +50,9 @@ auto PrettyPrinter::operator()(const LogicalPtr& expr) -> std::string {
   return fmt::format("({} {} {})", tt_to_string(expr->oper_m.type),
                      visit(*this, expr->left_m),
                      std::visit(*this, expr->right_m));
+}
+
+auto PrettyPrinter::operator()(const CallPtr& expr) -> std::string {
+  // TODO: Implement this
+  return fmt::format("(function {})", visit(*this, expr->callee_m));
 }

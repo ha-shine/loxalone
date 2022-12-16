@@ -32,7 +32,7 @@ auto Scanner::scan_tokens() -> std::optional<std::vector<Token>> {
     scan_token();
   }
 
-  tokens.emplace_back(TokenType::EOF, "", std::nullopt, line_m);
+  tokens.emplace_back(TokenType::EOF_, "", std::nullopt, line_m);
   return well_formed_m ? std::optional{tokens} : std::nullopt;
 }
 

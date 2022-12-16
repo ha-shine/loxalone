@@ -4,52 +4,56 @@
 #include <memory>
 #include <string>
 #include <variant>
+#include <vector>
 
 #include "Token.h"
 
 class Assign;
-class BinaryExpr;
-class GroupingExpr;
-class LiteralVal;
+class Binary;
+class Call;
+class Grouping;
+class Literal;
 class Logical;
-class UnaryExpr;
+class Unary;
 class Variable;
 
 using AssignPtr = std::unique_ptr<Assign>;
-using BinaryExprPtr = std::unique_ptr<BinaryExpr>;
-using GroupingExprPtr = std::unique_ptr<GroupingExpr>;
-using LiteralValPtr = std::unique_ptr<LiteralVal>;
+using BinaryPtr = std::unique_ptr<Binary>;
+using CallPtr = std::unique_ptr<Call>;
+using GroupingPtr = std::unique_ptr<Grouping>;
+using LiteralPtr = std::unique_ptr<Literal>;
 using LogicalPtr = std::unique_ptr<Logical>;
-using UnaryExprPtr = std::unique_ptr<UnaryExpr>;
+using UnaryPtr = std::unique_ptr<Unary>;
 using VariablePtr = std::unique_ptr<Variable>;
 
-using Expr = std::variant<AssignPtr, BinaryExprPtr, GroupingExprPtr,
-                          LiteralValPtr, LogicalPtr, UnaryExprPtr, VariablePtr>;
+using Expr = std::variant<AssignPtr, BinaryPtr, CallPtr, GroupingPtr,
+                          LiteralPtr, LogicalPtr, UnaryPtr, VariablePtr>;
 
 static auto expr_is_null(const Expr& expr) {
   if (std::holds_alternative<AssignPtr>(expr))
     return std::get<AssignPtr>(expr) == nullptr;
-  if (std::holds_alternative<BinaryExprPtr>(expr))
-    return std::get<BinaryExprPtr>(expr) == nullptr;
-  if (std::holds_alternative<GroupingExprPtr>(expr))
-    return std::get<GroupingExprPtr>(expr) == nullptr;
-  if (std::holds_alternative<LiteralValPtr>(expr))
-    return std::get<LiteralValPtr>(expr) == nullptr;
+  if (std::holds_alternative<BinaryPtr>(expr))
+    return std::get<BinaryPtr>(expr) == nullptr;
+  if (std::holds_alternative<CallPtr>(expr))
+    return std::get<CallPtr>(expr) == nullptr;
+  if (std::holds_alternative<GroupingPtr>(expr))
+    return std::get<GroupingPtr>(expr) == nullptr;
+  if (std::holds_alternative<LiteralPtr>(expr))
+    return std::get<LiteralPtr>(expr) == nullptr;
   if (std::holds_alternative<LogicalPtr>(expr))
     return std::get<LogicalPtr>(expr) == nullptr;
-  if (std::holds_alternative<UnaryExprPtr>(expr))
-    return std::get<UnaryExprPtr>(expr) == nullptr;
+  if (std::holds_alternative<UnaryPtr>(expr))
+    return std::get<UnaryPtr>(expr) == nullptr;
   if (std::holds_alternative<VariablePtr>(expr))
     return std::get<VariablePtr>(expr) == nullptr;
   return false;
 }
 
 template <typename V, typename Out>
-concept ExprVisitor =
-    requires(V v, const AssignPtr& arg_0, const BinaryExprPtr& arg_1,
-             const GroupingExprPtr& arg_2, const LiteralValPtr& arg_3,
-             const LogicalPtr& arg_4, const UnaryExprPtr& arg_5,
-             const VariablePtr& arg_6) {
+concept ExprVisitor = requires(
+    V v, const AssignPtr& arg_0, const BinaryPtr& arg_1, const CallPtr& arg_2,
+    const GroupingPtr& arg_3, const LiteralPtr& arg_4, const LogicalPtr& arg_5,
+    const UnaryPtr& arg_6, const VariablePtr& arg_7) {
   { v(arg_0) } -> std::convertible_to<Out>;
   { v(arg_1) } -> std::convertible_to<Out>;
   { v(arg_2) } -> std::convertible_to<Out>;
@@ -57,6 +61,7 @@ concept ExprVisitor =
   { v(arg_4) } -> std::convertible_to<Out>;
   { v(arg_5) } -> std::convertible_to<Out>;
   { v(arg_6) } -> std::convertible_to<Out>;
+  { v(arg_7) } -> std::convertible_to<Out>;
 };
 
 class Assign {
@@ -69,34 +74,46 @@ class Assign {
   ~Assign() = default;
 };
 
-class BinaryExpr {
+class Binary {
  public:
   const Expr left_m;
   const Token oper_m;
   const Expr right_m;
 
-  BinaryExpr(Expr&& left, Token&& oper, Expr&& right)
+  Binary(Expr&& left, Token&& oper, Expr&& right)
       : left_m{std::move(left)},
         oper_m{std::move(oper)},
         right_m{std::move(right)} {}
-  ~BinaryExpr() = default;
+  ~Binary() = default;
 };
 
-class GroupingExpr {
+class Call {
+ public:
+  const Expr callee_m;
+  const Token paren_m;
+  const std::vector<Expr> arguments_m;
+
+  Call(Expr&& callee, Token&& paren, std::vector<Expr>&& arguments)
+      : callee_m{std::move(callee)},
+        paren_m{std::move(paren)},
+        arguments_m{std::move(arguments)} {}
+  ~Call() = default;
+};
+
+class Grouping {
  public:
   const Expr expression_m;
 
-  explicit GroupingExpr(Expr&& expression)
-      : expression_m{std::move(expression)} {}
-  ~GroupingExpr() = default;
+  explicit Grouping(Expr&& expression) : expression_m{std::move(expression)} {}
+  ~Grouping() = default;
 };
 
-class LiteralVal {
+class Literal {
  public:
   const lox_literal value_m;
 
-  explicit LiteralVal(lox_literal&& value) : value_m{std::move(value)} {}
-  ~LiteralVal() = default;
+  explicit Literal(lox_literal&& value) : value_m{std::move(value)} {}
+  ~Literal() = default;
 };
 
 class Logical {
@@ -112,14 +129,14 @@ class Logical {
   ~Logical() = default;
 };
 
-class UnaryExpr {
+class Unary {
  public:
   const Token oper_m;
   const Expr right_m;
 
-  UnaryExpr(Token&& oper, Expr&& right)
+  Unary(Token&& oper, Expr&& right)
       : oper_m{std::move(oper)}, right_m{std::move(right)} {}
-  ~UnaryExpr() = default;
+  ~Unary() = default;
 };
 
 class Variable {

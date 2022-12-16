@@ -4,14 +4,16 @@
 
 #ifndef LOXALONE_TOKEN_H
 #define LOXALONE_TOKEN_H
-#undef EOF
 
 #include <fmt/format.h>
 #include <optional>
 #include <string>
 #include <variant>
 
-using lox_literal = std::variant<std::string, double, bool, std::monostate>;
+class LoxCallable;
+using CallablePtr = std::shared_ptr<LoxCallable>;
+
+using lox_literal = std::variant<std::string, double, bool, CallablePtr, std::monostate>;
 
 enum class TokenType {
   LEFT_PAREN,
@@ -56,7 +58,7 @@ enum class TokenType {
   VAR,
   WHILE,
 
-  EOF
+  EOF_
 };
 
 constexpr const char* tt_to_string(TokenType type) {
@@ -141,8 +143,8 @@ constexpr const char* tt_to_string(TokenType type) {
     case TokenType::WHILE:
       return "WHILE";
 
-    case TokenType::EOF:
-      return "EOF";
+    case TokenType::EOF_:
+      return "EOF_";
   }
 }
 
@@ -199,7 +201,23 @@ struct fmt::formatter<std::monostate> {
   }
 };
 
-// std::string, double, bool, std::monostate
+// Formatter implementation for std::shared_ptr<LoxCallable>
+template <>
+struct fmt::formatter<CallablePtr> {
+  constexpr auto parse(fmt::format_parse_context& ctx)
+      -> decltype(ctx.begin()) {
+    return ctx.end();
+  }
+
+  template <typename FormatContext>
+  auto format(const std::shared_ptr<LoxCallable>& token, FormatContext& ctx) const
+      -> decltype(ctx.out()) {
+    // TODO: Implement this, but not urgent since this is used only in
+    //       PrettyPrinter
+    return fmt::format_to(ctx.out(), "callable");
+  }
+};
+
 template<typename FormatContext>
 class LiteralFormatter {
  private:
@@ -208,10 +226,6 @@ class LiteralFormatter {
  public:
   auto operator()(const auto& arg) -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "{}\n", arg);
-  }
-
-  auto operator()(const std::monostate& arg) -> decltype(ctx.out()) {
-    return fmt::format_to(ctx.out(), "nil\n");
   }
 
   LiteralFormatter(FormatContext& ctx): ctx{ctx} {}

@@ -13,19 +13,21 @@
 #include "Expr.h"
 #include "Stmt.h"
 #include "Token.h"
+#include "LoxCallable.h"
 
 class Interpreter {
  public:
   Interpreter() : env{} {}
 
   // Expression visitor
-  auto operator()(const BinaryExprPtr&) -> lox_literal;
-  auto operator()(const GroupingExprPtr&) -> lox_literal;
-  auto operator()(const LiteralValPtr&) -> lox_literal;
-  auto operator()(const UnaryExprPtr&) -> lox_literal;
+  auto operator()(const BinaryPtr&) -> lox_literal;
+  auto operator()(const GroupingPtr&) -> lox_literal;
+  auto operator()(const LiteralPtr&) -> lox_literal;
+  auto operator()(const UnaryPtr&) -> lox_literal;
   auto operator()(const VariablePtr&) -> lox_literal;
   auto operator()(const AssignPtr&) -> lox_literal;
   auto operator()(const LogicalPtr&) -> lox_literal;
+  auto operator()(const CallPtr&) -> lox_literal;
 
   // Statement visitors
   auto operator()(const BlockPtr&) -> void;

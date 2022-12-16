@@ -46,7 +46,7 @@ Terminals are in capital letters.
 
 ```
 
-- program           -> declaration* EOF ;
+- program           -> declaration* EOF_ ;
 - declaration       -> var_decl
                      | statement ;
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -74,7 +74,9 @@ Terminals are in capital letters.
 - comparison        -> term ( (">" | ">=" | "<" | "<=") term )*;
 - term              -> factor ( ("+" | "-") factor )*;
 - factor            -> unary ( ("/" | "*") unary )*;
-- unary             -> ("!" | "-") unary | primary;
+- unary             -> ("!" | "-") unary | call ;
+- call              -> primary ( "(" arguments? ")" )* ;
+- arguments         -> expression ( "," expression )* ;
 - primary           -> NUMBER | STRING | "true" | "false" | "nil"
                      | "(" expression ")"
                      | IDENTIFIER ;

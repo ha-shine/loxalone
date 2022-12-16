@@ -128,7 +128,7 @@ auto Parser::for_statement() -> Stmt {
 
   // If the condition expression is null, use `true` literal (an infinite loop)
   if (expr_is_null(condition))
-    condition = Expr{std::make_unique<LiteralVal>(true)};
+    condition = Expr{std::make_unique<Literal>(true)};
 
   // De-sugar for loop into a while loop with the condition.
   body = Stmt{std::make_unique<While>(std::move(condition), std::move(body),
@@ -210,7 +210,7 @@ auto Parser::equality() -> Expr {
   while (match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
     Token oper = previous();
     Expr right = comparison();
-    expr = Expr{std::make_unique<BinaryExpr>(std::move(expr), std::move(oper),
+    expr = Expr{std::make_unique<Binary>(std::move(expr), std::move(oper),
                                              std::move(right))};
   }
 
@@ -224,7 +224,7 @@ auto Parser::comparison() -> Expr {
                TokenType::LESS_EQUAL)) {
     Token oper = previous();
     Expr right = term();
-    expr = Expr{std::make_unique<BinaryExpr>(std::move(expr), std::move(oper),
+    expr = Expr{std::make_unique<Binary>(std::move(expr), std::move(oper),
                                              std::move(right))};
   }
 
@@ -237,7 +237,7 @@ auto Parser::term() -> Expr {
   while (match(TokenType::PLUS, TokenType::MINUS)) {
     Token oper = previous();
     Expr right = factor();
-    expr = Expr{std::make_unique<BinaryExpr>(std::move(expr), std::move(oper),
+    expr = Expr{std::make_unique<Binary>(std::move(expr), std::move(oper),
                                              std::move(right))};
   }
 
@@ -250,7 +250,7 @@ auto Parser::factor() -> Expr {
   while (match(TokenType::SLASH, TokenType::STAR)) {
     Token oper = previous();
     Expr right = unary();
-    expr = Expr{std::make_unique<BinaryExpr>(std::move(expr), std::move(oper),
+    expr = Expr{std::make_unique<Binary>(std::move(expr), std::move(oper),
                                              std::move(right))};
   }
 
@@ -261,26 +261,55 @@ auto Parser::unary() -> Expr {
   if (match(TokenType::BANG, TokenType::MINUS)) {
     Token oper = previous();
     Expr right = unary();
-    return Expr{std::make_unique<UnaryExpr>(std::move(oper), std::move(right))};
+    return Expr{std::make_unique<Unary>(std::move(oper), std::move(right))};
   }
 
   return primary();
 }
 
+auto Parser::call() -> Expr {
+  Expr expr = primary();
+
+  while (true) {
+    if (match(TokenType::LEFT_PAREN)) {
+      expr = finish_call(std::move(expr));
+    } else {
+      break;
+    }
+  }
+
+  return expr;
+}
+
+auto Parser::finish_call(Expr&& callee) -> Expr {
+  std::vector<Expr> args{};
+  if (!check(TokenType::RIGHT_PAREN)) {
+    do {
+      if (args.size() >= 255) {
+        throw parser_error(peek(), "Can't have more than 255 arguments.");
+      }
+      args.emplace_back(expression());
+    } while (match(TokenType::COMMA));
+  }
+
+  const Token& paren = consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
+  return Expr{std::make_unique<Call>(std::move(callee), Token{paren}, std::move(args))};
+}
+
 auto Parser::primary() -> Expr {
   if (match(TokenType::TRUE))
-    return Expr{std::make_unique<LiteralVal>(true)};
+    return Expr{std::make_unique<Literal>(true)};
   if (match(TokenType::FALSE))
-    return Expr{std::make_unique<LiteralVal>(false)};
+    return Expr{std::make_unique<Literal>(false)};
   if (match(TokenType::NIL))
-    return Expr{std::make_unique<LiteralVal>(std::monostate{})};
+    return Expr{std::make_unique<Literal>(std::monostate{})};
   if (match(TokenType::NUMBER, TokenType::STRING))
     return Expr{
-        std::make_unique<LiteralVal>(lox_literal{previous().literal.value()})};
+        std::make_unique<Literal>(lox_literal{previous().literal.value()})};
   if (match(TokenType::LEFT_PAREN)) {
     Expr expr = expression();
     consume(TokenType::RIGHT_PAREN, "Expect ')' after expression");
-    return Expr{std::make_unique<GroupingExpr>(std::move(expr))};
+    return Expr{std::make_unique<Grouping>(std::move(expr))};
   }
   if (match(TokenType::IDENTIFIER)) {
     Token prev = previous();
@@ -311,7 +340,7 @@ auto Parser::peek() -> const Token& {
 }
 
 auto Parser::is_at_end() -> bool {
-  return peek().type == TokenType::EOF;
+  return peek().type == TokenType::EOF_;
 }
 
 template <typename Head, typename... Tail>
@@ -338,7 +367,7 @@ auto Parser::consume(TokenType type, std::string_view&& msg) -> Token {
 
 auto Parser::parser_error(const Token& token, const std::string_view& err)
     -> ParserError {
-  if (token.type == TokenType::EOF) {
+  if (token.type == TokenType::EOF_) {
     report(token.line, " at end", err);
   } else {
     report(token.line, fmt::format(" at '{}'", token.lexeme), err);

@@ -55,6 +55,8 @@ class Parser {
   auto term() -> Expr;
   auto factor() -> Expr;
   auto unary() -> Expr;
+  auto call() -> Expr;
+  auto finish_call(Expr&&) -> Expr;
   auto primary() -> Expr;
 
   // Helper methods to help with the parsing

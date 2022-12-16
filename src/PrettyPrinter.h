@@ -11,13 +11,14 @@
 // TODO: Probably better to use a string builder sort of type here
 class PrettyPrinter {
  public:
-  auto operator()(const BinaryExprPtr&) -> std::string;
-  auto operator()(const GroupingExprPtr&) -> std::string;
-  auto operator()(const LiteralValPtr&) -> std::string;
-  auto operator()(const UnaryExprPtr&) -> std::string;
+  auto operator()(const BinaryPtr&) -> std::string;
+  auto operator()(const GroupingPtr&) -> std::string;
+  auto operator()(const LiteralPtr&) -> std::string;
+  auto operator()(const UnaryPtr&) -> std::string;
   auto operator()(const VariablePtr&) -> std::string;
   auto operator()(const AssignPtr&) -> std::string;
   auto operator()(const LogicalPtr&) -> std::string;
+  auto operator()(const CallPtr &) -> std::string;
 
  private:
   // TODO: Can these two be written with variadic template?

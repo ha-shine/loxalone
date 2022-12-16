@@ -6,6 +6,8 @@
 
 #include <memory>
 
+#include "LoxCallable.h"
+
 // Report runtime scanner_error by printing to stderr
 auto report_error(const RuntimeError& err) -> void {
   fmt::print(stderr, "{}\n[line {}]", err.msg, err.token.line);
@@ -28,7 +30,7 @@ auto is_equal(const lox_literal& left, const lox_literal& right) -> bool {
   return false;
 }
 
-auto Interpreter::operator()(const BinaryExprPtr& expr) -> lox_literal {
+auto Interpreter::operator()(const BinaryPtr& expr) -> lox_literal {
   if (!expr)
     return std::monostate{};
 
@@ -76,21 +78,21 @@ auto Interpreter::operator()(const BinaryExprPtr& expr) -> lox_literal {
   }
 }
 
-auto Interpreter::operator()(const GroupingExprPtr& expr) -> lox_literal {
+auto Interpreter::operator()(const GroupingPtr& expr) -> lox_literal {
   if (!expr)
     return std::monostate{};
 
   return visit<lox_literal>(*this, expr->expression_m);
 }
 
-auto Interpreter::operator()(const LiteralValPtr& expr) -> lox_literal {
+auto Interpreter::operator()(const LiteralPtr& expr) -> lox_literal {
   if (!expr)
     return std::monostate{};
 
   return expr->value_m;
 }
 
-auto Interpreter::operator()(const UnaryExprPtr& expr) -> lox_literal {
+auto Interpreter::operator()(const UnaryPtr& expr) -> lox_literal {
   if (!expr)
     return std::monostate{};
 
@@ -138,6 +140,28 @@ auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
       return false;
   }
   return visit(*this, expr->right_m);
+}
+
+auto Interpreter::operator()(const CallPtr& expr) -> lox_literal {
+  // The interpreter needs to interpret this expression into a callable object
+  lox_literal callee = visit(*this, expr->callee_m);
+  std::vector<lox_literal> args{};
+  for (const auto& arg : expr->arguments_m) {
+    args.emplace_back(visit(*this, arg));
+  }
+
+  if (!std::holds_alternative<CallablePtr>(callee)) {
+    throw RuntimeError{expr->paren_m, "Can only call functions and classes"};
+  }
+
+  auto& ptr = std::get<CallablePtr>(callee);
+  if (args.size() != ptr->arity()) {
+    throw RuntimeError{expr->paren_m,
+                       fmt::format("Expected {} arguments but got {}.",
+                                   ptr->arity(), args.size())};
+  }
+
+  return ptr->call_func(args);
 }
 
 auto Interpreter::operator()(const BlockPtr& stmt) -> void {
