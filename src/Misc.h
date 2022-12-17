@@ -13,7 +13,7 @@
 
 // Transform all the letters from the original string using the given
 // function parameter
-auto transform_chars(const std::string_view& source, const std::function<char(char)>& fun) -> std::string {
+static auto transform_chars(const std::string_view& source, const std::function<char(char)>& fun) -> std::string {
     std::string result{};
     for (const auto& ch : source)
       result.push_back(static_cast<char>(fun(ch)));

@@ -6,12 +6,12 @@
 #include <variant>
 #include <vector>
 
-#include "Token.h"
-
 #include "Expr.h"
+#include "Token.h"
 
 class Block;
 class Expression;
+class Function;
 class If;
 class While;
 class Print;
@@ -19,19 +19,22 @@ class Var;
 
 using BlockPtr = std::unique_ptr<Block>;
 using ExpressionPtr = std::unique_ptr<Expression>;
+using FunctionPtr = std::unique_ptr<Function>;
 using IfPtr = std::unique_ptr<If>;
 using WhilePtr = std::unique_ptr<While>;
 using PrintPtr = std::unique_ptr<Print>;
 using VarPtr = std::unique_ptr<Var>;
 
-using Stmt =
-    std::variant<BlockPtr, ExpressionPtr, IfPtr, WhilePtr, PrintPtr, VarPtr>;
+using Stmt = std::variant<BlockPtr, ExpressionPtr, FunctionPtr, IfPtr, WhilePtr,
+                          PrintPtr, VarPtr>;
 
 static auto stmt_is_null(const Stmt& stmt) {
   if (std::holds_alternative<BlockPtr>(stmt))
     return std::get<BlockPtr>(stmt) == nullptr;
   if (std::holds_alternative<ExpressionPtr>(stmt))
     return std::get<ExpressionPtr>(stmt) == nullptr;
+  if (std::holds_alternative<FunctionPtr>(stmt))
+    return std::get<FunctionPtr>(stmt) == nullptr;
   if (std::holds_alternative<IfPtr>(stmt))
     return std::get<IfPtr>(stmt) == nullptr;
   if (std::holds_alternative<WhilePtr>(stmt))
@@ -45,15 +48,17 @@ static auto stmt_is_null(const Stmt& stmt) {
 
 template <typename V, typename Out>
 concept StmtVisitor = requires(
-    V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1, const IfPtr& arg_2,
-    const WhilePtr& arg_3, const PrintPtr& arg_4, const VarPtr& arg_5) {
-  { v(arg_0) } -> std::convertible_to<Out>;
-  { v(arg_1) } -> std::convertible_to<Out>;
-  { v(arg_2) } -> std::convertible_to<Out>;
-  { v(arg_3) } -> std::convertible_to<Out>;
-  { v(arg_4) } -> std::convertible_to<Out>;
-  { v(arg_5) } -> std::convertible_to<Out>;
-};
+    V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1,
+    const FunctionPtr& arg_2, const IfPtr& arg_3, const WhilePtr& arg_4,
+    const PrintPtr& arg_5, const VarPtr& arg_6) {
+                        { v(arg_0) } -> std::convertible_to<Out>;
+                        { v(arg_1) } -> std::convertible_to<Out>;
+                        { v(arg_2) } -> std::convertible_to<Out>;
+                        { v(arg_3) } -> std::convertible_to<Out>;
+                        { v(arg_4) } -> std::convertible_to<Out>;
+                        { v(arg_5) } -> std::convertible_to<Out>;
+                        { v(arg_6) } -> std::convertible_to<Out>;
+                      };
 
 class Block {
  public:
@@ -71,6 +76,19 @@ class Expression {
   explicit Expression(Expr&& expression)
       : expression_m{std::move(expression)} {}
   ~Expression() = default;
+};
+
+class Function {
+ public:
+  const Token name_m;
+  const std::vector<Token> params_m;
+  const std::vector<Stmt> body_m;
+
+  Function(Token&& name, std::vector<Token>&& params, std::vector<Stmt>&& body)
+      : name_m{std::move(name)},
+        params_m{std::move(params)},
+        body_m{std::move(body)} {}
+  ~Function() = default;
 };
 
 class If {

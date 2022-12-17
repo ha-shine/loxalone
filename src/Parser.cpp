@@ -20,6 +20,8 @@ auto Parser::parse() -> std::vector<Stmt> {
 
 auto Parser::declaration() -> Stmt {
   try {
+    if (match(TokenType::FUN))
+      return function("function");
     if (match(TokenType::VAR))
       return var_declaration();
 
@@ -160,6 +162,28 @@ auto Parser::block() -> std::vector<Stmt> {
   return statements;
 }
 
+auto Parser::function(const std::string_view& kind) -> Stmt {
+  Token name = consume(TokenType::IDENTIFIER, fmt::format("Expect {} name.", kind));
+  consume(TokenType::LEFT_PAREN, fmt::format("Expect '(' after {} name.", kind));
+
+  std::vector<Token> params{};
+  if (!check(TokenType::RIGHT_PAREN)) {
+    do {
+      if (params.size() >= 255) {
+        parser_error(peek(), "Can't have more than 255 parameters.");
+      }
+
+      params.emplace_back(consume(TokenType::IDENTIFIER, "Expect parameter name."));
+    } while (match(TokenType::COMMA));
+  }
+
+  consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+  consume(TokenType::LEFT_BRACE, fmt::format("Expect '{{' before {} body.", kind));
+  std::vector<Stmt> body{block()};
+
+  return Stmt{std::make_unique<Function>(std::move(name), std::move(params), std::move(body))};
+}
+
 auto Parser::expression() -> Expr {
   return assignment();
 }
@@ -264,7 +288,7 @@ auto Parser::unary() -> Expr {
     return Expr{std::make_unique<Unary>(std::move(oper), std::move(right))};
   }
 
-  return primary();
+  return call();
 }
 
 auto Parser::call() -> Expr {

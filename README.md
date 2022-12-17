@@ -47,8 +47,12 @@ Terminals are in capital letters.
 ```
 
 - program           -> declaration* EOF_ ;
-- declaration       -> var_decl
+- declaration       -> fun_decl 
+                     | var_decl
                      | statement ;
+- fun_decl          -> "fun" function ;
+- function          -> IDENTIFIER "(" parameters? ")" block ;
+- parameters        -> IDENTIFIER ( "," IDENTIFIER )* ;
 - var_decl          -> "var" IDENTIFIER ( "=" expression )? ";" ;
 - statement         -> expr_statement
                      | for_statement

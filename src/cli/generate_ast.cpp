@@ -3,6 +3,7 @@
 //
 #include <fmt/format.h>
 #include <sysexits.h>
+
 #include <filesystem>
 #include <fstream>
 #include <vector>
@@ -34,8 +35,7 @@ auto define_type(std::ostream& out, const std::string_view& base,
 
   for (int i = 0; i < cls.fields.size(); i++) {
     out << fmt::format("{}&& {}", cls.fields[i].type, cls.fields[i].name);
-    if (i < cls.fields.size() - 1)
-      out << ", ";
+    if (i < cls.fields.size() - 1) out << ", ";
   }
 
   out << "): ";
@@ -43,8 +43,7 @@ auto define_type(std::ostream& out, const std::string_view& base,
   // TODO: Figure out the escape character for braces in fmt
   for (int i = 0; i < cls.fields.size(); i++) {
     out << cls.fields[i].name << "_m{std::move(" << cls.fields[i].name << ")}";
-    if (i < cls.fields.size() - 1)
-      out << ", ";
+    if (i < cls.fields.size() - 1) out << ", ";
   }
 
   out << " {}\n" << fmt::format("  ~{}() = default;\n", cls.name) << "};\n\n";
@@ -101,14 +100,13 @@ auto define_ast(const std::filesystem::path& filepath,
   out << fmt::format("using {} = std::variant<", base);
   for (int i = 0; i < classes.size(); i++) {
     out << classes[i].name << "Ptr";
-    if (i < classes.size() - 1)
-      out << ",";
+    if (i < classes.size() - 1) out << ",";
   }
   out << ">;\n\n";
 
   // define base_is_null function for pointers
-  out << fmt::format("static auto {}_is_null(const {}& {}) {{\n", to_lowercase(base),
-                     base, to_lowercase(base));
+  out << fmt::format("static auto {}_is_null(const {}& {}) {{\n",
+                     to_lowercase(base), base, to_lowercase(base));
   for (auto& clz : classes) {
     out << fmt::format("  if (std::holds_alternative<{}Ptr>({}))\n", clz.name,
                        to_lowercase(base))
@@ -124,8 +122,7 @@ auto define_ast(const std::filesystem::path& filepath,
       << fmt::format("concept {}Visitor = requires (V v,", base);
   for (int i = 0; i < classes.size(); i++) {
     out << fmt::format(" const {}Ptr& arg_{}", classes[i].name, i);
-    if (i < classes.size() - 1)
-      out << ",";
+    if (i < classes.size() - 1) out << ",";
   }
   out << ") { \n";
   for (int i = 0; i < classes.size(); i++) {
@@ -151,18 +148,19 @@ int main(int argc, char** argv) {
   auto filepath = std::filesystem::path{argv[1]};
   std::filesystem::create_directories(filepath);
 
-  define_ast(
-      filepath / "Expr.h", "Expr",
-      {"Assign       - Token name, Expr value",
-       "Binary   - Expr left, Token oper, Expr right",
-       "Call - Expr callee, Token paren, std::vector<Expr> arguments",
-       "Grouping - Expr expression", "Literal - lox_literal value",
-       "Logical - Expr left, Token oper, Expr right",
-       "Unary    - Token oper, Expr right", "Variable - Token name"},
-      {});
+  define_ast(filepath / "Expr.h", "Expr",
+             {"Assign - Token name, Expr value",
+              "Binary - Expr left, Token oper, Expr right",
+              "Call - Expr callee, Token paren, std::vector<Expr> arguments",
+              "Grouping - Expr expression", "Literal - lox_literal value",
+              "Logical - Expr left, Token oper, Expr right",
+              "Unary    - Token oper, Expr right", "Variable - Token name"},
+             {});
   define_ast(
       filepath / "Stmt.h", "Stmt",
       {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
+       "Function - Token name, std::vector<Token> params, std::vector<Stmt> "
+       "body",
        "If - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
        "While - Expr condition, Stmt body, Token token",
        "Print - Expr expression", "Var - Token name, Expr initializer"},

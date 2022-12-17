@@ -54,15 +54,15 @@ concept ExprVisitor = requires(
     V v, const AssignPtr& arg_0, const BinaryPtr& arg_1, const CallPtr& arg_2,
     const GroupingPtr& arg_3, const LiteralPtr& arg_4, const LogicalPtr& arg_5,
     const UnaryPtr& arg_6, const VariablePtr& arg_7) {
-  { v(arg_0) } -> std::convertible_to<Out>;
-  { v(arg_1) } -> std::convertible_to<Out>;
-  { v(arg_2) } -> std::convertible_to<Out>;
-  { v(arg_3) } -> std::convertible_to<Out>;
-  { v(arg_4) } -> std::convertible_to<Out>;
-  { v(arg_5) } -> std::convertible_to<Out>;
-  { v(arg_6) } -> std::convertible_to<Out>;
-  { v(arg_7) } -> std::convertible_to<Out>;
-};
+                        { v(arg_0) } -> std::convertible_to<Out>;
+                        { v(arg_1) } -> std::convertible_to<Out>;
+                        { v(arg_2) } -> std::convertible_to<Out>;
+                        { v(arg_3) } -> std::convertible_to<Out>;
+                        { v(arg_4) } -> std::convertible_to<Out>;
+                        { v(arg_5) } -> std::convertible_to<Out>;
+                        { v(arg_6) } -> std::convertible_to<Out>;
+                        { v(arg_7) } -> std::convertible_to<Out>;
+                      };
 
 class Assign {
  public:

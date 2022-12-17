@@ -17,7 +17,7 @@
 
 class Interpreter {
  public:
-  Interpreter() : env{} {}
+  Interpreter();
 
   // Expression visitor
   auto operator()(const BinaryPtr&) -> lox_literal;
@@ -32,6 +32,7 @@ class Interpreter {
   // Statement visitors
   auto operator()(const BlockPtr&) -> void;
   auto operator()(const ExpressionPtr&) -> void;
+  auto operator()(const FunctionPtr&) -> void;
   auto operator()(const PrintPtr&) -> void;
   auto operator()(const VarPtr&) -> void;
   auto operator()(const IfPtr&) -> void;
@@ -41,6 +42,10 @@ class Interpreter {
   // or false if there's a runtime error
   auto interpret(const std::vector<Stmt>&) -> bool;
 
+  // Other helper methods
+  auto execute_block(const std::vector<Stmt>&, Environment&&) -> void;
+  auto get_globals() -> const Environment&;
+
  private:
   auto check_is_number(const Token&, const lox_literal&) -> void;
   auto check_is_boolean(const Token&, const lox_literal&) -> void;
@@ -48,6 +53,7 @@ class Interpreter {
       -> void;
 
   Environment env;
+  Environment globals;
 };
 
 static_assert(ExprVisitor<Interpreter, lox_literal>);
