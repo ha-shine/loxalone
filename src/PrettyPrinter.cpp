@@ -6,6 +6,8 @@
 
 #include "Token.h"
 
+#include <sstream>
+
 auto PrettyPrinter::operator()(const BinaryPtr& expr) -> std::string {
   return parenthesize(expr->oper_m.lexeme, expr->left_m, expr->right_m);
 }
@@ -53,6 +55,11 @@ auto PrettyPrinter::operator()(const LogicalPtr& expr) -> std::string {
 }
 
 auto PrettyPrinter::operator()(const CallPtr& expr) -> std::string {
-  // TODO: Implement this
-  return fmt::format("(function {})", visit(*this, expr->callee_m));
+  std::stringstream oss{};
+  oss << fmt::format("({}", visit(*this, expr->callee_m));
+  for (const auto& arg : expr->arguments_m) {
+    oss << fmt::format(" {}", std::visit(*this, arg));
+  }
+  oss << ")";
+  return oss.str();
 }
