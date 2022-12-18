@@ -72,6 +72,12 @@ class Assign {
   Assign(Token&& name, Expr&& value)
       : name_m{std::move(name)}, value_m{std::move(value)} {}
   ~Assign() = default;
+
+  static auto create(Token&& name, Expr&& value) -> Expr {
+    return std::make_unique<Assign>(std::move(name), std::move(value));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Assign>(nullptr); }
 };
 
 class Binary {
@@ -85,6 +91,13 @@ class Binary {
         oper_m{std::move(oper)},
         right_m{std::move(right)} {}
   ~Binary() = default;
+
+  static auto create(Expr&& left, Token&& oper, Expr&& right) -> Expr {
+    return std::make_unique<Binary>(std::move(left), std::move(oper),
+                                    std::move(right));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Binary>(nullptr); }
 };
 
 class Call {
@@ -98,6 +111,14 @@ class Call {
         paren_m{std::move(paren)},
         arguments_m{std::move(arguments)} {}
   ~Call() = default;
+
+  static auto create(Expr&& callee, Token&& paren,
+                     std::vector<Expr>&& arguments) -> Expr {
+    return std::make_unique<Call>(std::move(callee), std::move(paren),
+                                  std::move(arguments));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Call>(nullptr); }
 };
 
 class Grouping {
@@ -106,6 +127,12 @@ class Grouping {
 
   explicit Grouping(Expr&& expression) : expression_m{std::move(expression)} {}
   ~Grouping() = default;
+
+  static auto create(Expr&& expression) -> Expr {
+    return std::make_unique<Grouping>(std::move(expression));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Grouping>(nullptr); }
 };
 
 class Literal {
@@ -114,6 +141,12 @@ class Literal {
 
   explicit Literal(lox_literal&& value) : value_m{std::move(value)} {}
   ~Literal() = default;
+
+  static auto create(lox_literal&& value) -> Expr {
+    return std::make_unique<Literal>(std::move(value));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Literal>(nullptr); }
 };
 
 class Logical {
@@ -127,6 +160,13 @@ class Logical {
         oper_m{std::move(oper)},
         right_m{std::move(right)} {}
   ~Logical() = default;
+
+  static auto create(Expr&& left, Token&& oper, Expr&& right) -> Expr {
+    return std::make_unique<Logical>(std::move(left), std::move(oper),
+                                     std::move(right));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Logical>(nullptr); }
 };
 
 class Unary {
@@ -137,6 +177,12 @@ class Unary {
   Unary(Token&& oper, Expr&& right)
       : oper_m{std::move(oper)}, right_m{std::move(right)} {}
   ~Unary() = default;
+
+  static auto create(Token&& oper, Expr&& right) -> Expr {
+    return std::make_unique<Unary>(std::move(oper), std::move(right));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Unary>(nullptr); }
 };
 
 class Variable {
@@ -145,6 +191,12 @@ class Variable {
 
   explicit Variable(Token&& name) : name_m{std::move(name)} {}
   ~Variable() = default;
+
+  static auto create(Token&& name) -> Expr {
+    return std::make_unique<Variable>(std::move(name));
+  }
+
+  static auto empty() -> Expr { return std::unique_ptr<Variable>(nullptr); }
 };
 
 #endif

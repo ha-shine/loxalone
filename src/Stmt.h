@@ -67,6 +67,12 @@ class Block {
   explicit Block(std::vector<Stmt>&& statements)
       : statements_m{std::move(statements)} {}
   ~Block() = default;
+
+  static auto create(std::vector<Stmt>&& statements) -> Stmt {
+    return std::make_unique<Block>(std::move(statements));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Block>(nullptr); }
 };
 
 class Expression {
@@ -76,6 +82,12 @@ class Expression {
   explicit Expression(Expr&& expression)
       : expression_m{std::move(expression)} {}
   ~Expression() = default;
+
+  static auto create(Expr&& expression) -> Stmt {
+    return std::make_unique<Expression>(std::move(expression));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Expression>(nullptr); }
 };
 
 class Function {
@@ -89,6 +101,14 @@ class Function {
         params_m{std::move(params)},
         body_m{std::move(body)} {}
   ~Function() = default;
+
+  static auto create(Token&& name, std::vector<Token>&& params,
+                     std::vector<Stmt>&& body) -> Stmt {
+    return std::make_unique<Function>(std::move(name), std::move(params),
+                                      std::move(body));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Function>(nullptr); }
 };
 
 class If {
@@ -104,6 +124,14 @@ class If {
         then_branch_m{std::move(then_branch)},
         else_branch_m{std::move(else_branch)} {}
   ~If() = default;
+
+  static auto create(Expr&& expression, Token&& token, Stmt&& then_branch,
+                     Stmt&& else_branch) -> Stmt {
+    return std::make_unique<If>(std::move(expression), std::move(token),
+                                std::move(then_branch), std::move(else_branch));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<If>(nullptr); }
 };
 
 class While {
@@ -117,6 +145,13 @@ class While {
         body_m{std::move(body)},
         token_m{std::move(token)} {}
   ~While() = default;
+
+  static auto create(Expr&& condition, Stmt&& body, Token&& token) -> Stmt {
+    return std::make_unique<While>(std::move(condition), std::move(body),
+                                   std::move(token));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<While>(nullptr); }
 };
 
 class Print {
@@ -125,6 +160,12 @@ class Print {
 
   explicit Print(Expr&& expression) : expression_m{std::move(expression)} {}
   ~Print() = default;
+
+  static auto create(Expr&& expression) -> Stmt {
+    return std::make_unique<Print>(std::move(expression));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Print>(nullptr); }
 };
 
 class Var {
@@ -135,6 +176,12 @@ class Var {
   Var(Token&& name, Expr&& initializer)
       : name_m{std::move(name)}, initializer_m{std::move(initializer)} {}
   ~Var() = default;
+
+  static auto create(Token&& name, Expr&& initializer) -> Stmt {
+    return std::make_unique<Var>(std::move(name), std::move(initializer));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Var>(nullptr); }
 };
 
 #endif

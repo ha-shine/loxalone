@@ -46,7 +46,32 @@ auto define_type(std::ostream& out, const std::string_view& base,
     if (i < cls.fields.size() - 1) out << ", ";
   }
 
-  out << " {}\n" << fmt::format("  ~{}() = default;\n", cls.name) << "};\n\n";
+  out << " {}\n"
+      << fmt::format("  ~{}() = default;\n\n", cls.name);
+
+  // helper method for creating this type
+  out << "  static auto create(";
+  for (int i = 0; i < cls.fields.size(); i++) {
+    out << fmt::format("{}&& {}", cls.fields[i].type, to_lowercase(cls.fields[i].name));
+    if (i < cls.fields.size() - 1) out << ", ";
+  }
+  out << fmt::format(") -> {} {{\n", base)
+      << fmt::format("    return std::make_unique<{}>(", cls.name);
+  for (int i = 0; i < cls.fields.size(); i++) {
+    out << fmt::format("std::move({})", cls.fields[i].name);
+    if (i < cls.fields.size() - 1) out << ", ";
+  }
+  out << ");\n"
+      << "  }\n\n";
+
+  // helper method for creating empty() method for creating empty pointer of
+  // this type
+  out << fmt::format("  static auto empty() -> {} {{\n", base)
+      << fmt::format("    return std::unique_ptr<{}>(nullptr);\n", cls.name)
+      << "  }\n\n";
+
+  // end
+  out << "};\n\n";
 }
 
 // TODO: Revisit this by checking out other interpreters, how do we implement
