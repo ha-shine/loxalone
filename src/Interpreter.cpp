@@ -7,12 +7,13 @@
 #include <chrono>
 #include <memory>
 
+#include "LiteralFormatter.h"
 #include "LoxCallable.h"
 
 Interpreter::Interpreter() : env{}, globals{} {
   globals.define(
       "clock",
-      std::make_shared<NativeCallable>(0, [](const auto& args) -> lox_literal {
+      std::make_shared<NativeCallable>("clock", 0, [](const auto& args) -> lox_literal {
         using namespace std::chrono;
 
         auto time = system_clock::now().time_since_epoch();

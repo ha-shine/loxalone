@@ -19,3 +19,7 @@ auto LoxFunction::execute(Interpreter& interpreter, const std::vector<lox_litera
   interpreter.execute_block(declaration->body_m, std::move(env));
   return std::monostate{};
 }
+
+auto LoxFunction::name() -> std::string_view {
+  return declaration->name_m.lexeme;
+}

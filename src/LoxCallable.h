@@ -16,6 +16,7 @@ class LoxCallable {
  public:
   virtual auto arity() -> int = 0;
   virtual auto execute(Interpreter&, const std::vector<lox_literal>&) -> lox_literal = 0;
+  virtual auto name() -> std::string_view = 0;
 };
 
 // LoxFunction implements a function object for loxalone
@@ -29,6 +30,7 @@ class LoxFunction : public LoxCallable {
   auto arity() -> int override;
   auto execute(Interpreter&, const std::vector<lox_literal>& args)
       -> lox_literal override;
+  auto name() -> std::string_view override;
 };
 
 // NativeCallable is a helper class that bridges the C++ callables with the
@@ -37,17 +39,22 @@ class NativeCallable : public LoxCallable {
  private:
   using func = std::function<lox_literal(const std::vector<lox_literal>&)>;
 
+  const std::string name_m;
   int arity_m;
   func fun_m;
 
  public:
-  NativeCallable(int arity, func&& fun)
-      : arity_m{arity}, fun_m{std::move(fun)} {}
+  NativeCallable(std::string_view name, int arity, func&& fun)
+      : name_m{name}, arity_m{arity}, fun_m{std::move(fun)} {}
 
   auto arity() -> int override { return arity_m; }
 
   auto execute(Interpreter&, const std::vector<lox_literal>& args) -> lox_literal override {
     return fun_m(args);
+  }
+
+  auto name() -> std::string_view override {
+    return name_m;
   }
 };
 
