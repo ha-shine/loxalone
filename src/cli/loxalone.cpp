@@ -27,6 +27,7 @@ auto run(Interpreter& interpreter, const std::string_view& source) -> bool {
   return interpreter.interpret(statements);
 }
 
+// TODO: Non-existent files are not being reported here, fix this.
 auto run_file(const std::string_view& file) -> int {
   std::ifstream fs{file};
   std::string source{};

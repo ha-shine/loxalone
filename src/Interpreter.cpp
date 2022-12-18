@@ -202,10 +202,26 @@ auto Interpreter::operator()(const FunctionPtr& stmt) -> void {
   // use non-const stmt or fields, but I don't want to lose the nice-ity of
   // having const values everywhere.
   auto& ptr = const_cast<FunctionPtr&>(stmt);
-  LoxFunction function{std::make_unique<Function>(
-      Token{ptr->name_m},
-      std::move(const_cast<std::vector<Token>&>(ptr->params_m)),
-      std::move(const_cast<std::vector<Stmt>&>(ptr->body_m)))};
+
+  // The current environment is captured as a closure so that the created
+  // function object still have access to current environment. Otherwise,
+  // the variables defined could be lost if this function object is escaped
+  // from the current scope. e.g.
+  //
+  // fun makeFn() {
+  //   var i = 1;
+  //   fun returnI() { return i; }
+  //   return returnI;
+  // }
+  //
+  // var fn = makeFn(); fn(); <- undefined variable i
+  //
+  LoxFunction function{
+      std::make_unique<Function>(
+          Token{ptr->name_m},
+          std::move(const_cast<std::vector<Token>&>(ptr->params_m)),
+          std::move(const_cast<std::vector<Stmt>&>(ptr->body_m))),
+      *env};
   env->define(stmt->name_m.lexeme,
               std::make_shared<LoxFunction>(std::move(function)));
 }

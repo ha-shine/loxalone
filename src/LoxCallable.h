@@ -5,17 +5,20 @@
 #ifndef LOXALONE_LOXCALLABLE_H
 #define LOXALONE_LOXCALLABLE_H
 
+#include <utility>
 #include <vector>
 
 #include "Stmt.h"
 #include "Token.h"
+#include "Environment.h"
 
 class Interpreter;
 
 class LoxCallable {
  public:
   virtual auto arity() -> int = 0;
-  virtual auto execute(Interpreter&, const std::vector<lox_literal>&) -> lox_literal = 0;
+  virtual auto execute(Interpreter&, const std::vector<lox_literal>&)
+      -> lox_literal = 0;
   virtual auto name() -> std::string_view = 0;
 };
 
@@ -23,9 +26,11 @@ class LoxCallable {
 class LoxFunction : public LoxCallable {
  private:
   FunctionPtr declaration;
+  Environment closure;
 
  public:
-  explicit LoxFunction(FunctionPtr&& declaration) : declaration{std::move(declaration)} {}
+  explicit LoxFunction(FunctionPtr&& declaration, Environment closure)
+      : declaration{std::move(declaration)}, closure{std::move(closure)} {}
 
   auto arity() -> int override;
   auto execute(Interpreter&, const std::vector<lox_literal>& args)
@@ -49,13 +54,12 @@ class NativeCallable : public LoxCallable {
 
   auto arity() -> int override { return arity_m; }
 
-  auto execute(Interpreter&, const std::vector<lox_literal>& args) -> lox_literal override {
+  auto execute(Interpreter&, const std::vector<lox_literal>& args)
+      -> lox_literal override {
     return fun_m(args);
   }
 
-  auto name() -> std::string_view override {
-    return name_m;
-  }
+  auto name() -> std::string_view override { return name_m; }
 };
 
 #endif  // LOXALONE_LOXCALLABLE_H

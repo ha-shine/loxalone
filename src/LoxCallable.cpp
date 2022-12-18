@@ -11,7 +11,7 @@ auto LoxFunction::arity() -> int {
 
 auto LoxFunction::execute(Interpreter& interpreter, const std::vector<lox_literal>& args)
     -> lox_literal {
-  Environment env{interpreter.get_globals()};
+  Environment env{&closure};
   for (int i = 0; i < declaration->params_m.size(); i++) {
     env.define(declaration->params_m[i].lexeme, args[i]);
   }
