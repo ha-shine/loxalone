@@ -45,6 +45,7 @@ auto Parser::var_declaration() -> Stmt {
 auto Parser::statement() -> Stmt {
   if (match(TokenType::IF)) return if_statement();
   if (match(TokenType::PRINT)) return print_statement();
+  if (match(TokenType::RETURN)) return return_statement();
   if (match(TokenType::WHILE)) return while_statement();
   if (match(TokenType::FOR)) return for_statement();
   if (match(TokenType::LEFT_BRACE)) return Block::create(block());
@@ -174,6 +175,17 @@ auto Parser::function(const std::string_view& kind) -> Stmt {
   std::vector<Stmt> body{block()};
 
   return Function::create(std::move(name), std::move(params), std::move(body));
+}
+
+auto Parser::return_statement() -> Stmt {
+  Token keyword = previous();
+  Expr value = Variable::empty();
+  if (!check(TokenType::SEMICOLON)) {
+    value = expression();
+  }
+
+  consume(TokenType::SEMICOLON, "Expect ';' after return value.");
+  return Return::create(std::move(keyword), std::move(value));
 }
 
 auto Parser::expression() -> Expr { return assignment(); }

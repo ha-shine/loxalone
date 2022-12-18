@@ -10,16 +10,16 @@
 #include "LiteralFormatter.h"
 #include "LoxCallable.h"
 
-Interpreter::Interpreter() : env{}, globals{} {
-  globals.define(
-      "clock",
-      std::make_shared<NativeCallable>("clock", 0, [](const auto& args) -> lox_literal {
-        using namespace std::chrono;
+Interpreter::Interpreter() : globals{}, env{&globals} {
+  globals.define("clock", std::make_shared<NativeCallable>(
+                              "clock", 0, [](const auto& args) -> lox_literal {
+                                using namespace std::chrono;
 
-        auto time = system_clock::now().time_since_epoch();
-        auto to_s = duration_cast<seconds>(time);
-        return 1.0 * static_cast<double>(to_s.count());
-      }));
+                                auto time =
+                                    system_clock::now().time_since_epoch();
+                                auto to_s = duration_cast<seconds>(time);
+                                return 1.0 * static_cast<double>(to_s.count());
+                              }));
 }
 
 // Report runtime scanner_error by printing to stderr
@@ -125,18 +125,20 @@ auto Interpreter::operator()(const VariablePtr& expr) -> lox_literal {
 
   // TODO: This returns the copied value (and create a variant object).
   //       Profile this function.
-  return env.get(expr->name_m);
+  return env->get(expr->name_m);
 }
 
 auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
   if (!expr) return std::monostate{};
+
   lox_literal value = visit(*this, expr->value_m);
-  env.assign(expr->name_m, value);
+  env->assign(expr->name_m, value);
   return value;
 }
 
 auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
   if (!expr) return std::monostate{};
+
   lox_literal left = visit(*this, expr->left_m);
   check_is_boolean(expr->oper_m, left);
   if (expr->oper_m.type == TokenType::OR) {
@@ -148,6 +150,8 @@ auto Interpreter::operator()(const LogicalPtr& expr) -> lox_literal {
 }
 
 auto Interpreter::operator()(const CallPtr& expr) -> lox_literal {
+  if (!expr) return std::monostate{};
+
   // The interpreter needs to interpret this expression into a callable object
   lox_literal callee = visit(*this, expr->callee_m);
   std::vector<lox_literal> args{};
@@ -172,21 +176,22 @@ auto Interpreter::operator()(const CallPtr& expr) -> lox_literal {
 auto Interpreter::operator()(const BlockPtr& stmt) -> void {
   if (!stmt) return;
 
-  Environment previous = std::move(env);
+  Environment* previous = env;
 
   // Dumb RAII handler to restore the parent's scope after exit
   std::shared_ptr<std::monostate> cleaner{
-      nullptr, [&](std::monostate* ptr) { env = std::move(previous); }};
+      nullptr, [&](std::monostate* ptr) { env = previous; }};
 
-  env = Environment{&previous};
+  Environment new_env = Environment{previous};
+  env = &new_env;
   for (const auto& statement : stmt->statements_m) {
     visit(*this, statement);
   }
-  execute_block(stmt->statements_m, Environment{&this->env});
 }
 
 auto Interpreter::operator()(const ExpressionPtr& stmt) -> void {
   if (!stmt) return;
+
   visit(*this, stmt->expression_m);
 }
 
@@ -201,24 +206,27 @@ auto Interpreter::operator()(const FunctionPtr& stmt) -> void {
       Token{ptr->name_m},
       std::move(const_cast<std::vector<Token>&>(ptr->params_m)),
       std::move(const_cast<std::vector<Stmt>&>(ptr->body_m)))};
-  env.define(stmt->name_m.lexeme,
-             std::make_shared<LoxFunction>(std::move(function)));
+  env->define(stmt->name_m.lexeme,
+              std::make_shared<LoxFunction>(std::move(function)));
 }
 
 auto Interpreter::operator()(const PrintPtr& stmt) -> void {
   if (!stmt) return;
+
   lox_literal value = visit(*this, stmt->expression_m);
   fmt::print("{}", value);
 }
 
 auto Interpreter::operator()(const VarPtr& stmt) -> void {
   if (!stmt) return;
+
   lox_literal val = visit(*this, stmt->initializer_m);
-  env.define(stmt->name_m.lexeme, val);
+  env->define(stmt->name_m.lexeme, val);
 }
 
 auto Interpreter::operator()(const IfPtr& stmt) -> void {
   if (!stmt) return;
+
   lox_literal condition = visit(*this, stmt->expression_m);
   if (!std::holds_alternative<bool>(condition))
     throw RuntimeError{stmt->token_m,
@@ -232,6 +240,8 @@ auto Interpreter::operator()(const IfPtr& stmt) -> void {
 }
 
 auto Interpreter::operator()(const WhilePtr& stmt) -> void {
+  if (!stmt) return;
+
   lox_literal condition = std::visit(*this, stmt->condition_m);
   if (!std::holds_alternative<bool>(condition))
     throw RuntimeError{stmt->token_m,
@@ -244,6 +254,13 @@ auto Interpreter::operator()(const WhilePtr& stmt) -> void {
       throw RuntimeError{stmt->token_m,
                          "While condition must be a boolean expression."};
   }
+}
+
+auto Interpreter::operator()(const ReturnPtr& stmt) -> void {
+  if (!stmt) return;
+
+  lox_literal value = visit(*this, stmt->value_m);
+  if (!std::holds_alternative<std::monostate>(value)) throw ReturnObject{value};
 }
 
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
@@ -259,14 +276,14 @@ auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
 }
 
 auto Interpreter::execute_block(const std::vector<Stmt>& stmts,
-                                Environment&& environment) -> void {
-  Environment previous = std::move(env);
+                                Environment* environment) -> void {
+  Environment* previous = env;
 
   // Dumb RAII handler to restore the parent's scope after exit
   std::shared_ptr<std::monostate> cleaner{
-      nullptr, [&](std::monostate* ptr) { env = std::move(previous); }};
+      nullptr, [&](std::monostate* ptr) { env = previous; }};
 
-  env = std::move(environment);
+  env = environment;
   for (const auto& statement : stmts) {
     visit(*this, statement);
   }

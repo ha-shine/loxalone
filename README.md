@@ -58,6 +58,7 @@ Terminals are in capital letters.
                      | for_statement
                      | if_statement
                      | print_statement
+                     | return_statement
                      | while_statement 
                      | block ;
 - for_statement     -> "for" "(" ( var_decl | expr_statement | ";" )
@@ -68,6 +69,7 @@ Terminals are in capital letters.
 - block             -> "{" declaration* "}" ;
 - expr_statement    -> expression ";" ;
 - print_statement   -> "print" expression ";" ;
+- return_statement  -> "return" expression? ";" ;
 - while_statement   -> "while" "(" expression ")" statement ;
 - expression        -> assignment ;
 - assignment        -> IDENTIFIER "=" assignment

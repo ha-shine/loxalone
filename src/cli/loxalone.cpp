@@ -1,11 +1,12 @@
 #include <fmt/format.h>
 #include <sysexits.h>
+
+#include <fstream>
 #include <iostream>
 #include <string_view>
 
 #include "../Interpreter.h"
 #include "../Parser.h"
-#include "../PrettyPrinter.h"
 #include "../Scanner.h"
 
 const auto USAGE = "Usage: loxalone [script]";
@@ -18,8 +19,7 @@ auto run(Interpreter& interpreter, const std::string_view& source) -> bool {
   Scanner scanner{source};
 
   std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
-  if (!tokens.has_value())
-    return false;
+  if (!tokens.has_value()) return false;
 
   Parser parser{tokens.value()};
   std::vector<Stmt> statements = parser.parse();
@@ -28,7 +28,22 @@ auto run(Interpreter& interpreter, const std::string_view& source) -> bool {
 }
 
 auto run_file(const std::string_view& file) -> int {
-  return 0;
+  std::ifstream fs{file};
+  std::string source{};
+
+  char c;
+  while (fs.get(c))
+    source.push_back(c);
+
+  Scanner scanner{source};
+  std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
+  if (!tokens.has_value()) return false;
+
+  Parser parser{tokens.value()};
+  std::vector<Stmt> statements = parser.parse();
+
+  Interpreter interpreter{};
+  return interpreter.interpret(statements);
 }
 
 auto run_prompt() -> int {

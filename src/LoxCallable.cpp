@@ -16,7 +16,12 @@ auto LoxFunction::execute(Interpreter& interpreter, const std::vector<lox_litera
     env.define(declaration->params_m[i].lexeme, args[i]);
   }
 
-  interpreter.execute_block(declaration->body_m, std::move(env));
+  try {
+    interpreter.execute_block(declaration->body_m, &env);
+  } catch (ReturnObject& ret) {
+    return ret.value;
+  }
+
   return std::monostate{};
 }
 

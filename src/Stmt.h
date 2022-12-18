@@ -15,6 +15,7 @@ class Function;
 class If;
 class While;
 class Print;
+class Return;
 class Var;
 
 using BlockPtr = std::unique_ptr<Block>;
@@ -23,10 +24,11 @@ using FunctionPtr = std::unique_ptr<Function>;
 using IfPtr = std::unique_ptr<If>;
 using WhilePtr = std::unique_ptr<While>;
 using PrintPtr = std::unique_ptr<Print>;
+using ReturnPtr = std::unique_ptr<Return>;
 using VarPtr = std::unique_ptr<Var>;
 
 using Stmt = std::variant<BlockPtr, ExpressionPtr, FunctionPtr, IfPtr, WhilePtr,
-                          PrintPtr, VarPtr>;
+                          PrintPtr, ReturnPtr, VarPtr>;
 
 static auto stmt_is_null(const Stmt& stmt) {
   if (std::holds_alternative<BlockPtr>(stmt))
@@ -41,6 +43,8 @@ static auto stmt_is_null(const Stmt& stmt) {
     return std::get<WhilePtr>(stmt) == nullptr;
   if (std::holds_alternative<PrintPtr>(stmt))
     return std::get<PrintPtr>(stmt) == nullptr;
+  if (std::holds_alternative<ReturnPtr>(stmt))
+    return std::get<ReturnPtr>(stmt) == nullptr;
   if (std::holds_alternative<VarPtr>(stmt))
     return std::get<VarPtr>(stmt) == nullptr;
   return false;
@@ -50,7 +54,7 @@ template <typename V, typename Out>
 concept StmtVisitor = requires(
     V v, const BlockPtr& arg_0, const ExpressionPtr& arg_1,
     const FunctionPtr& arg_2, const IfPtr& arg_3, const WhilePtr& arg_4,
-    const PrintPtr& arg_5, const VarPtr& arg_6) {
+    const PrintPtr& arg_5, const ReturnPtr& arg_6, const VarPtr& arg_7) {
                         { v(arg_0) } -> std::convertible_to<Out>;
                         { v(arg_1) } -> std::convertible_to<Out>;
                         { v(arg_2) } -> std::convertible_to<Out>;
@@ -58,6 +62,7 @@ concept StmtVisitor = requires(
                         { v(arg_4) } -> std::convertible_to<Out>;
                         { v(arg_5) } -> std::convertible_to<Out>;
                         { v(arg_6) } -> std::convertible_to<Out>;
+                        { v(arg_7) } -> std::convertible_to<Out>;
                       };
 
 class Block {
@@ -166,6 +171,22 @@ class Print {
   }
 
   static auto empty() -> Stmt { return std::unique_ptr<Print>(nullptr); }
+};
+
+class Return {
+ public:
+  const Token keyword_m;
+  const Expr value_m;
+
+  Return(Token&& keyword, Expr&& value)
+      : keyword_m{std::move(keyword)}, value_m{std::move(value)} {}
+  ~Return() = default;
+
+  static auto create(Token&& keyword, Expr&& value) -> Stmt {
+    return std::make_unique<Return>(std::move(keyword), std::move(value));
+  }
+
+  static auto empty() -> Stmt { return std::unique_ptr<Return>(nullptr); }
 };
 
 class Var {

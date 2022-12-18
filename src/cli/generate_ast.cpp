@@ -46,13 +46,13 @@ auto define_type(std::ostream& out, const std::string_view& base,
     if (i < cls.fields.size() - 1) out << ", ";
   }
 
-  out << " {}\n"
-      << fmt::format("  ~{}() = default;\n\n", cls.name);
+  out << " {}\n" << fmt::format("  ~{}() = default;\n\n", cls.name);
 
   // helper method for creating this type
   out << "  static auto create(";
   for (int i = 0; i < cls.fields.size(); i++) {
-    out << fmt::format("{}&& {}", cls.fields[i].type, to_lowercase(cls.fields[i].name));
+    out << fmt::format("{}&& {}", cls.fields[i].type,
+                       to_lowercase(cls.fields[i].name));
     if (i < cls.fields.size() - 1) out << ", ";
   }
   out << fmt::format(") -> {} {{\n", base)
@@ -173,21 +173,25 @@ int main(int argc, char** argv) {
   auto filepath = std::filesystem::path{argv[1]};
   std::filesystem::create_directories(filepath);
 
-  define_ast(filepath / "Expr.h", "Expr",
-             {"Assign - Token name, Expr value",
-              "Binary - Expr left, Token oper, Expr right",
-              "Call - Expr callee, Token paren, std::vector<Expr> arguments",
-              "Grouping - Expr expression", "Literal - lox_literal value",
-              "Logical - Expr left, Token oper, Expr right",
-              "Unary    - Token oper, Expr right", "Variable - Token name"},
-             {});
-  define_ast(
-      filepath / "Stmt.h", "Stmt",
-      {"Block - std::vector<Stmt> statements", "Expression - Expr expression",
-       "Function - Token name, std::vector<Token> params, std::vector<Stmt> "
-       "body",
-       "If - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
-       "While - Expr condition, Stmt body, Token token",
-       "Print - Expr expression", "Var - Token name, Expr initializer"},
-      {"Expr.h"});
+  // clang-format off
+  define_ast(filepath / "Expr.h", "Expr", {
+              "Assign   - Token name, Expr value",
+              "Binary   - Expr left, Token oper, Expr right",
+              "Call     - Expr callee, Token paren, std::vector<Expr> arguments",
+              "Grouping - Expr expression",
+              "Literal  - lox_literal value",
+              "Logical  - Expr left, Token oper, Expr right",
+              "Unary    - Token oper, Expr right",
+              "Variable - Token name"}, {});
+
+  define_ast(filepath / "Stmt.h", "Stmt", {
+              "Block      - std::vector<Stmt> statements",
+              "Expression - Expr expression",
+              "Function   - Token name, std::vector<Token> params, std::vector<Stmt> body",
+              "If         - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
+              "While      - Expr condition, Stmt body, Token token",
+              "Print      - Expr expression",
+              "Return     - Token keyword, Expr value",
+              "Var        - Token name, Expr initializer"}, {"Expr.h"});
+  // clang-format on
 }

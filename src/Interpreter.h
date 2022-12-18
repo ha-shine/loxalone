@@ -37,13 +37,14 @@ class Interpreter {
   auto operator()(const VarPtr&) -> void;
   auto operator()(const IfPtr&) -> void;
   auto operator()(const WhilePtr&) -> void;
+  auto operator()(const ReturnPtr&) -> void;
 
   // Entry point for interpreter, returns true if it's successful
   // or false if there's a runtime error
   auto interpret(const std::vector<Stmt>&) -> bool;
 
   // Other helper methods
-  auto execute_block(const std::vector<Stmt>&, Environment&&) -> void;
+  auto execute_block(const std::vector<Stmt>&, Environment*) -> void;
   auto get_globals() -> const Environment&;
 
  private:
@@ -52,11 +53,21 @@ class Interpreter {
   auto check_are_numbers(const Token&, const lox_literal&, const lox_literal&)
       -> void;
 
-  Environment env;
+  Environment* env;
   Environment globals;
 };
 
 static_assert(ExprVisitor<Interpreter, lox_literal>);
 static_assert(StmtVisitor<Interpreter, void>);
+
+// `ReturnObject` encapsulates a literal value and used as a return object from lox
+// functions. The interpreter will throw `ReturnObject` which should be caught by
+// the function object and return the literal value from inside.
+class ReturnObject: public std::exception {
+ public:
+  lox_literal value;
+
+  explicit ReturnObject(lox_literal value): std::exception{}, value{value} {}
+};
 
 #endif  //LOXALONE_INTERPRETER_H

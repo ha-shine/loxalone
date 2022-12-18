@@ -41,6 +41,7 @@ class Parser {
   auto for_statement() -> Stmt;
   auto expression_statement() -> Stmt;
   auto function(const std::string_view&) -> Stmt;
+  auto return_statement() -> Stmt;
 
   // This returns a list of block instead of statement because this
   // will be reused in other parsing, e.g. functions.
