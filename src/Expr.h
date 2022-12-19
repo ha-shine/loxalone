@@ -30,24 +30,14 @@ using Expr = std::variant<AssignPtr, BinaryPtr, CallPtr, GroupingPtr,
                           LiteralPtr, LogicalPtr, UnaryPtr, VariablePtr>;
 
 static auto expr_is_null(const Expr& expr) {
-  if (std::holds_alternative<AssignPtr>(expr))
-    return std::get<AssignPtr>(expr) == nullptr;
-  if (std::holds_alternative<BinaryPtr>(expr))
-    return std::get<BinaryPtr>(expr) == nullptr;
-  if (std::holds_alternative<CallPtr>(expr))
-    return std::get<CallPtr>(expr) == nullptr;
-  if (std::holds_alternative<GroupingPtr>(expr))
-    return std::get<GroupingPtr>(expr) == nullptr;
-  if (std::holds_alternative<LiteralPtr>(expr))
-    return std::get<LiteralPtr>(expr) == nullptr;
-  if (std::holds_alternative<LogicalPtr>(expr))
-    return std::get<LogicalPtr>(expr) == nullptr;
-  if (std::holds_alternative<UnaryPtr>(expr))
-    return std::get<UnaryPtr>(expr) == nullptr;
-  if (std::holds_alternative<VariablePtr>(expr))
-    return std::get<VariablePtr>(expr) == nullptr;
-  return false;
+  return visit([](auto&& arg) -> bool { return arg == nullptr; }, expr);
 }
+
+template <typename T>
+concept IsExpr = std::same_as<T, AssignPtr> || std::same_as<T, BinaryPtr> ||
+                 std::same_as<T, CallPtr> || std::same_as<T, GroupingPtr> ||
+                 std::same_as<T, LiteralPtr> || std::same_as<T, LogicalPtr> ||
+                 std::same_as<T, UnaryPtr> || std::same_as<T, VariablePtr>;
 
 template <typename V, typename Out>
 concept ExprVisitor = requires(

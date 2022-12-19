@@ -131,15 +131,21 @@ auto define_ast(const std::filesystem::path& filepath,
 
   // define base_is_null function for pointers
   out << fmt::format("static auto {}_is_null(const {}& {}) {{\n",
-                     to_lowercase(base), base, to_lowercase(base));
-  for (auto& clz : classes) {
-    out << fmt::format("  if (std::holds_alternative<{}Ptr>({}))\n", clz.name,
-                       to_lowercase(base))
-        << fmt::format("    return std::get<{}Ptr>({}) == nullptr;\n", clz.name,
-                       to_lowercase(base));
+                     to_lowercase(base), base, to_lowercase(base))
+      << fmt::format(
+             "  return visit([](auto&& arg) -> bool {{ return arg == nullptr; "
+             "}}, {});\n",
+             to_lowercase(base))
+      << fmt::format("}}\n\n");
+
+  // define Is<Type> concept
+  out << fmt::format("template <typename T>\n")
+      << fmt::format("concept Is{} =", base);
+  for (int i = 0; i < classes.size(); i++) {
+    out << fmt::format(" std::same_as<T, {}Ptr>", classes[i].name);
+    if (i < classes.size() - 1) out << " ||";
   }
-  out << "  return false;\n"
-      << "}\n\n";
+  out << ";\n\n";
 
   // define Visitor concept so callers can static_assert their type to ensure
   // the visitor classes are compliant, ie define all required methods

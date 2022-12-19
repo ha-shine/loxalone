@@ -10,7 +10,7 @@
 #include "LiteralFormatter.h"
 #include "LoxCallable.h"
 
-Interpreter::Interpreter() : globals{}, env{&globals} {
+Interpreter::Interpreter() : globals{}, env{&globals}, locals{} {
   globals.define("clock", std::make_shared<NativeCallable>(
                               "clock", 0, [](const auto& args) -> lox_literal {
                                 using namespace std::chrono;
@@ -122,17 +122,21 @@ auto Interpreter::operator()(const UnaryPtr& expr) -> lox_literal {
 
 auto Interpreter::operator()(const VariablePtr& expr) -> lox_literal {
   if (!expr) return std::monostate{};
-
-  // TODO: This returns the copied value (and create a variant object).
-  //       Profile this function.
-  return env->get(expr->name_m);
+  return lookup_variable(expr->name_m, expr);
 }
 
 auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
   if (!expr) return std::monostate{};
 
   lox_literal value = visit(*this, expr->value_m);
-  env->assign(expr->name_m, value);
+  void *ptr = static_cast<void*>(expr.get());
+  auto find = locals.find(ptr);
+  if (find != locals.end()) {
+    env->assign_at(expr->name_m, find->second, lox_literal{value});
+  } else {
+    globals.assign(expr->name_m, value);
+  }
+
   return value;
 }
 

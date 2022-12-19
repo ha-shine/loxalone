@@ -7,6 +7,7 @@
 
 #include "../Interpreter.h"
 #include "../Parser.h"
+#include "../Resolver.h"
 #include "../Scanner.h"
 
 const auto USAGE = "Usage: loxalone [script]";
@@ -24,31 +25,53 @@ auto run(Interpreter& interpreter, const std::string_view& source) -> bool {
   Parser parser{tokens.value()};
   std::vector<Stmt> statements = parser.parse();
 
-  return interpreter.interpret(statements);
+  try {
+    Resolver resolver{interpreter};
+    resolver.resolve(statements);
+
+    return interpreter.interpret(statements);
+  } catch (const ParserError& err) {
+    report(err.token.line, "", err.msg);
+  } catch (const RuntimeError& err) {
+    report(err.token.line, "", err.msg);
+  }
+
+  return false;
 }
 
 // TODO: Non-existent files are not being reported here, fix this.
 auto run_file(const std::string_view& file) -> int {
-  std::ifstream fs{file};
-  std::string source{};
+  try {
+    std::ifstream fs{file};
+    std::string source{};
 
-  char c;
-  while (fs.get(c))
-    source.push_back(c);
+    char c;
+    while (fs.get(c))
+      source.push_back(c);
 
-  Scanner scanner{source};
-  std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
-  if (!tokens.has_value()) return false;
+    Scanner scanner{source};
+    std::optional<std::vector<Token>> tokens{scanner.scan_tokens()};
+    if (!tokens.has_value()) return false;
 
-  Parser parser{tokens.value()};
-  std::vector<Stmt> statements = parser.parse();
+    Parser parser{tokens.value()};
+    std::vector<Stmt> statements = parser.parse();
 
-  Interpreter interpreter{};
-  return interpreter.interpret(statements);
+    Interpreter interpreter{};
+    Resolver resolver{interpreter};
+    resolver.resolve(statements);
+    return interpreter.interpret(statements);
+  } catch (const ParserError& err) {
+    report(err.token.line, "", err.msg);
+  } catch (const RuntimeError& err) {
+    report(err.token.line, "", err.msg);
+  }
+
+  return 1;
 }
 
 auto run_prompt() -> int {
   Interpreter interpreter{};
+
   std::string input;
 
   while (true) {

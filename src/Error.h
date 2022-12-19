@@ -6,6 +6,7 @@
 #define LOXALONE_ERROR_H
 
 #include <fmt/format.h>
+
 #include <exception>
 #include <string>
 
@@ -13,20 +14,18 @@
 
 class RuntimeError : std::exception {
  public:
-  RuntimeError(Token token, const std::string_view& msg)
+  RuntimeError(Token token, std::string_view msg)
       : token{std::move(token)}, msg{msg} {}
 
-  const std::string msg;
+  std::string msg;
   const Token token;
 };
 
-static auto report(int line, const std::string_view& where,
-            const std::string_view& msg)  {
+static auto report(int line, std::string_view where,
+                   const std::string_view& msg) {
   fmt::print(stderr, "[line {}] Error{}: {}\n", line, where, msg);
 }
 
-static auto error(int line, const std::string_view& msg) {
-  report(line, "", msg);
-}
+static auto error(int line, std::string_view msg) { report(line, "", msg); }
 
-#endif  //LOXALONE_ERROR_H
+#endif  // LOXALONE_ERROR_H

@@ -98,3 +98,7 @@ Terminals are in capital letters.
 - REPL no longer supports entering single expression, it can be convenient for the user to be able to type expressions
   and see the results
 - Add `break` and `continue` statement inside loops
+- Add support for **anonymous functions** or **lambdas**
+- Extend resolver to report an error if a local variable is never used
+- Associate a unique index for each local variable declared in a scope and store that together with the depth.
+  When resolving from interpreter, use that to quickly access the variable. This will be faster than using names.

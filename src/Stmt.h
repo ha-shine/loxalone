@@ -31,24 +31,14 @@ using Stmt = std::variant<BlockPtr, ExpressionPtr, FunctionPtr, IfPtr, WhilePtr,
                           PrintPtr, ReturnPtr, VarPtr>;
 
 static auto stmt_is_null(const Stmt& stmt) {
-  if (std::holds_alternative<BlockPtr>(stmt))
-    return std::get<BlockPtr>(stmt) == nullptr;
-  if (std::holds_alternative<ExpressionPtr>(stmt))
-    return std::get<ExpressionPtr>(stmt) == nullptr;
-  if (std::holds_alternative<FunctionPtr>(stmt))
-    return std::get<FunctionPtr>(stmt) == nullptr;
-  if (std::holds_alternative<IfPtr>(stmt))
-    return std::get<IfPtr>(stmt) == nullptr;
-  if (std::holds_alternative<WhilePtr>(stmt))
-    return std::get<WhilePtr>(stmt) == nullptr;
-  if (std::holds_alternative<PrintPtr>(stmt))
-    return std::get<PrintPtr>(stmt) == nullptr;
-  if (std::holds_alternative<ReturnPtr>(stmt))
-    return std::get<ReturnPtr>(stmt) == nullptr;
-  if (std::holds_alternative<VarPtr>(stmt))
-    return std::get<VarPtr>(stmt) == nullptr;
-  return false;
+  return visit([](auto&& arg) -> bool { return arg == nullptr; }, stmt);
 }
+
+template <typename T>
+concept IsStmt = std::same_as<T, BlockPtr> || std::same_as<T, ExpressionPtr> ||
+                 std::same_as<T, FunctionPtr> || std::same_as<T, IfPtr> ||
+                 std::same_as<T, WhilePtr> || std::same_as<T, PrintPtr> ||
+                 std::same_as<T, ReturnPtr> || std::same_as<T, VarPtr>;
 
 template <typename V, typename Out>
 concept StmtVisitor = requires(
