@@ -23,19 +23,19 @@ class Environment {
       : values{}, enclosing{enclosing} {}
   Environment() : Environment{nullptr} {}
 
-  auto define(const std::string_view &, lox_literal) -> void;
+  auto define(std::string_view key, lox_literal value) -> void;
 
-  auto get(const Token &) -> const lox_literal &;
-  auto get_at(const Token &, int) -> const lox_literal &;
+  auto get(const Token &) const -> const lox_literal &;
+  auto get_at(const Token &, int) const -> const lox_literal &;
 
   auto assign(const Token &, lox_literal) -> void;
   auto assign_at(const Token &token, int distance, lox_literal &&value) -> void;
 
  private:
   // Returns the ancestor at the given distance
-  auto ancestor(int distance) -> Environment *;
+  auto ancestor(int distance) const -> const Environment *;
 
-  std::unordered_map<std::string, lox_literal> values;
+  mutable std::unordered_map<std::string, lox_literal> values;
 
   // It's okay to use a pointer for the enclosing environment as the parent
   // environment will ALWAYS be alive when the current scope is active.

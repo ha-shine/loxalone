@@ -8,7 +8,7 @@
 
 namespace loxalone {
 
-auto LoxFunction::arity() -> int {
+auto LoxFunction::arity() const -> int {
   return static_cast<int>(declaration->params_m.size());
 }
 

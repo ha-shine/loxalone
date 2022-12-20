@@ -65,7 +65,7 @@ class Block {
       : statements_m{std::move(statements)} {}
   ~Block() = default;
 
-  static auto create(std::vector<Stmt>&& statements) -> Stmt {
+  static auto create(std::vector<Stmt>&& statements) -> BlockPtr {
     return std::make_unique<Block>(std::move(statements));
   }
 
@@ -80,7 +80,7 @@ class Expression {
       : expression_m{std::move(expression)} {}
   ~Expression() = default;
 
-  static auto create(Expr&& expression) -> Stmt {
+  static auto create(Expr&& expression) -> ExpressionPtr {
     return std::make_unique<Expression>(std::move(expression));
   }
 
@@ -100,7 +100,7 @@ class Function {
   ~Function() = default;
 
   static auto create(Token&& name, std::vector<Token>&& params,
-                     std::vector<Stmt>&& body) -> Stmt {
+                     std::vector<Stmt>&& body) -> FunctionPtr {
     return std::make_unique<Function>(std::move(name), std::move(params),
                                       std::move(body));
   }
@@ -123,7 +123,7 @@ class If {
   ~If() = default;
 
   static auto create(Expr&& expression, Token&& token, Stmt&& then_branch,
-                     Stmt&& else_branch) -> Stmt {
+                     Stmt&& else_branch) -> IfPtr {
     return std::make_unique<If>(std::move(expression), std::move(token),
                                 std::move(then_branch), std::move(else_branch));
   }
@@ -143,7 +143,7 @@ class While {
         token_m{std::move(token)} {}
   ~While() = default;
 
-  static auto create(Expr&& condition, Stmt&& body, Token&& token) -> Stmt {
+  static auto create(Expr&& condition, Stmt&& body, Token&& token) -> WhilePtr {
     return std::make_unique<While>(std::move(condition), std::move(body),
                                    std::move(token));
   }
@@ -158,7 +158,7 @@ class Print {
   explicit Print(Expr&& expression) : expression_m{std::move(expression)} {}
   ~Print() = default;
 
-  static auto create(Expr&& expression) -> Stmt {
+  static auto create(Expr&& expression) -> PrintPtr {
     return std::make_unique<Print>(std::move(expression));
   }
 
@@ -174,7 +174,7 @@ class Return {
       : keyword_m{std::move(keyword)}, value_m{std::move(value)} {}
   ~Return() = default;
 
-  static auto create(Token&& keyword, Expr&& value) -> Stmt {
+  static auto create(Token&& keyword, Expr&& value) -> ReturnPtr {
     return std::make_unique<Return>(std::move(keyword), std::move(value));
   }
 
@@ -190,7 +190,7 @@ class Var {
       : name_m{std::move(name)}, initializer_m{std::move(initializer)} {}
   ~Var() = default;
 
-  static auto create(Token&& name, Expr&& initializer) -> Stmt {
+  static auto create(Token&& name, Expr&& initializer) -> VarPtr {
     return std::make_unique<Var>(std::move(name), std::move(initializer));
   }
 

@@ -12,14 +12,14 @@
 
 namespace loxalone {
 
-auto Environment::define(const std::string_view& key, lox_literal val) -> void {
-  values[std::string{key}] = std::move(val);
+auto Environment::define(std::string_view key, lox_literal value) -> void {
+  values[std::string{key}] = std::move(value);
 }
 
 // The distance to the scope is known thanks to the resolver, which means
 // this function is not needed anymore? Same goes for assign below
 // TODO: Revisit
-auto Environment::get(const Token& token) -> const lox_literal& {
+auto Environment::get(const Token& token) const -> const lox_literal& {
   auto ptr = values.find(token.lexeme);
   if (ptr != values.end()) {
     return ptr->second;
@@ -32,13 +32,13 @@ auto Environment::get(const Token& token) -> const lox_literal& {
                      fmt::format("Undefined variable '{}'.", token.lexeme)};
 }
 
-auto Environment::get_at(const Token& token, int distance)
+auto Environment::get_at(const Token& token, int distance) const
     -> const lox_literal& {
   return ancestor(distance)->values[token.lexeme];
 }
 
-auto Environment::ancestor(int distance) -> Environment* {
-  Environment* env = this;
+auto Environment::ancestor(int distance) const -> const Environment* {
+  const Environment* env = this;
   for (int i = 0; i < distance; i++) {
     env = env->enclosing;
   }

@@ -64,7 +64,7 @@ class Interpreter {
 
   // Other helper methods
   auto execute_block(const std::vector<Stmt> &, Environment *) -> void;
-  auto get_globals() -> const Environment &;
+  auto get_globals() const -> const Environment &;
 
  private:
   auto check_is_number(const Token &, const lox_literal &) -> void;

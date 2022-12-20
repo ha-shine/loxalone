@@ -223,7 +223,7 @@ auto Interpreter::operator()(const FunctionPtr& stmt) -> void {
   // var fn = makeFn(); fn(); <- undefined variable i
   //
   LoxFunction function{
-      std::make_unique<Function>(
+      Function::create(
           Token{ptr->name_m},
           std::move(const_cast<std::vector<Token>&>(ptr->params_m)),
           std::move(const_cast<std::vector<Stmt>&>(ptr->body_m))),
@@ -311,7 +311,7 @@ auto Interpreter::execute_block(const std::vector<Stmt>& stmts,
   }
 }
 
-auto Interpreter::get_globals() -> const Environment& { return this->globals; }
+auto Interpreter::get_globals() const -> const Environment& { return this->globals; }
 
 auto Interpreter::check_is_number(const Token& oper, const lox_literal& operand)
     -> void {

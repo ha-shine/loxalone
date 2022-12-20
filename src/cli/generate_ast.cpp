@@ -57,7 +57,7 @@ auto define_type(std::ostream& out, const std::string_view& base,
                        to_lowercase(cls.fields[i].name));
     if (i < cls.fields.size() - 1) out << ", ";
   }
-  out << fmt::format(") -> {} {{\n", base)
+  out << fmt::format(") -> {}Ptr {{\n", cls.name)
       << fmt::format("    return std::make_unique<{}>(", cls.name);
   for (int i = 0; i < cls.fields.size(); i++) {
     out << fmt::format("std::move({})", cls.fields[i].name);
