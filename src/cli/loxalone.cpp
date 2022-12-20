@@ -5,10 +5,10 @@
 #include <iostream>
 #include <string_view>
 
-#include "../Interpreter.h"
-#include "../Parser.h"
-#include "../Resolver.h"
-#include "../Scanner.h"
+#include "../interpreter/Interpreter.h"
+#include "../interpreter/Parser.h"
+#include "../interpreter/Resolver.h"
+#include "../interpreter/Scanner.h"
 
 const auto USAGE = "Usage: loxalone [script]";
 

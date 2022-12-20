@@ -6,22 +6,22 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(fmt CONFIG REQUIRED)
 
 set(sources
-        src/Scanner.cpp
-        src/Scanner.h
-        src/Token.h
-        src/Error.h
-        src/Stmt.h
-        src/Expr.h
-        src/Parser.cpp
-        src/Parser.h
-        src/Interpreter.h
-        src/Interpreter.cpp src/LoxCallable.cpp src/LoxCallable.h)
+        src/interpreter/Scanner.cpp
+        src/interpreter/Scanner.h
+        src/interpreter/Token.h
+        src/interpreter/Error.h
+        src/interpreter/Stmt.h
+        src/interpreter/Expr.h
+        src/interpreter/Parser.cpp
+        src/interpreter/Parser.h
+        src/interpreter/Interpreter.h
+        src/interpreter/Interpreter.cpp src/interpreter/LoxCallable.cpp src/interpreter/LoxCallable.h)
 
-add_executable(loxalone src/cli/loxalone.cpp src/PrettyPrinter.cpp src/PrettyPrinter.h ${sources} src/Environment.cpp src/Environment.h src/LiteralFormatter.h src/Resolver.cpp src/Resolver.h)
+add_executable(loxalone src/cli/loxalone.cpp src/interpreter/PrettyPrinter.cpp src/interpreter/PrettyPrinter.h ${sources} src/interpreter/Environment.cpp src/interpreter/Environment.h src/interpreter/LiteralFormatter.h src/interpreter/Resolver.cpp src/interpreter/Resolver.h)
 target_link_libraries(loxalone PRIVATE fmt::fmt)
 
-add_executable(pretty_print src/cli/pretty_print.cpp src/PrettyPrinter.cpp src/PrettyPrinter.h ${sources})
+add_executable(pretty_print src/cli/pretty_print.cpp src/interpreter/PrettyPrinter.cpp src/interpreter/PrettyPrinter.h ${sources})
 target_link_libraries(pretty_print PRIVATE fmt::fmt)
 
-add_executable(generate_ast src/cli/generate_ast.cpp src/Misc.cpp src/Misc.h)
+add_executable(generate_ast src/cli/generate_ast.cpp src/interpreter/Misc.cpp src/interpreter/Misc.h)
 target_link_libraries(generate_ast PRIVATE fmt::fmt)

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "../PrettyPrinter.h"
+#include "../interpreter/PrettyPrinter.h"
 
 using namespace loxalone;
 

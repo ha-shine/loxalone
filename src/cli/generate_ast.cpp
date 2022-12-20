@@ -8,7 +8,7 @@
 #include <fstream>
 #include <vector>
 
-#include "../Misc.h"
+#include "../interpreter/Misc.h"
 
 static const auto USAGE = "Usage: generate_ast <output directory>\n";
 
