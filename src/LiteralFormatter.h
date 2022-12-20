@@ -31,14 +31,14 @@ struct fmt::formatter<std::monostate> {
 
 // Formatter implementation for std::shared_ptr<LoxCallable>
 template <>
-struct fmt::formatter<CallablePtr> {
+struct fmt::formatter<loxalone::CallablePtr> {
   constexpr auto parse(fmt::format_parse_context& ctx)
       -> decltype(ctx.begin()) {
     return ctx.end();
   }
 
   template <typename FormatContext>
-  auto format(const std::shared_ptr<LoxCallable>& token, FormatContext& ctx) const
+  auto format(const std::shared_ptr<loxalone::LoxCallable>& token, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return fmt::format_to(ctx.out(), "<fun {}>", token->name());
   }
@@ -59,14 +59,14 @@ class LiteralFormatter {
 
 // Formatter implementation for lox_literal
 template <>
-struct fmt::formatter<lox_literal> {
+struct fmt::formatter<loxalone::lox_literal> {
   constexpr auto parse(fmt::format_parse_context& ctx)
       -> decltype(ctx.begin()) {
     return ctx.end();
   }
 
   template <typename FormatContext>
-  auto format(const lox_literal& val, FormatContext& ctx) const
+  auto format(const loxalone::lox_literal& val, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     return std::visit(LiteralFormatter(ctx), val);
   }

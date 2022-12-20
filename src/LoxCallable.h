@@ -8,9 +8,11 @@
 #include <utility>
 #include <vector>
 
+#include "Environment.h"
 #include "Stmt.h"
 #include "Token.h"
-#include "Environment.h"
+
+namespace loxalone {
 
 class Interpreter;
 
@@ -61,5 +63,7 @@ class NativeCallable : public LoxCallable {
 
   auto name() -> std::string_view override { return name_m; }
 };
+
+}  // namespace loxalone
 
 #endif  // LOXALONE_LOXCALLABLE_H

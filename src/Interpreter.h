@@ -16,6 +16,7 @@
 #include "Stmt.h"
 #include "Token.h"
 
+namespace loxalone {
 class Interpreter {
  public:
   Interpreter();
@@ -79,14 +80,15 @@ class Interpreter {
 static_assert(ExprVisitor<Interpreter, lox_literal>);
 static_assert(StmtVisitor<Interpreter, void>);
 
-// `ReturnObject` encapsulates a literal value and used as a return object from
-// lox functions. The interpreter will throw `ReturnObject` which should be
-// caught by the function object and return the literal value from inside.
+// `ReturnObject` encapsulates a literal value and used as a return object
+// from lox functions. The interpreter will throw `ReturnObject` which should
+// be caught by the function object and return the literal value from inside.
 class ReturnObject : public std::exception {
  public:
   lox_literal value;
 
   explicit ReturnObject(lox_literal value) : std::exception{}, value{value} {}
 };
+}  // namespace loxalone
 
 #endif  // LOXALONE_INTERPRETER_H

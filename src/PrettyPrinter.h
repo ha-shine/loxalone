@@ -10,6 +10,7 @@
 #include "Expr.h"
 #include "LiteralFormatter.h"
 
+namespace loxalone {
 // TODO: Probably better to use a string builder sort of type here
 class PrettyPrinter {
  public:
@@ -30,5 +31,6 @@ class PrettyPrinter {
 };
 
 static_assert(ExprVisitor<PrettyPrinter, std::string>);
+}  // namespace loxalone
 
 #endif  // LOXALONE_PRETTYPRINTER_H

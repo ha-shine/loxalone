@@ -8,16 +8,18 @@
 #include <string>
 #include <vector>
 
+namespace loxalone {
 // TODO: Find if there are standard library functions for these
 // TODO: Integrate with a testing framework
 
 // Transform all the letters from the original string using the given
 // function parameter
-static auto transform_chars(const std::string_view& source, const std::function<char(char)>& fun) -> std::string {
-    std::string result{};
-    for (const auto& ch : source)
-      result.push_back(static_cast<char>(fun(ch)));
-    return result;
+static auto transform_chars(const std::string_view& source,
+                            const std::function<char(char)>& fun)
+    -> std::string {
+  std::string result{};
+  for (const auto& ch : source) result.push_back(static_cast<char>(fun(ch)));
+  return result;
 }
 
 // Returns a new string with all the letters from the original string in
@@ -31,5 +33,6 @@ auto split(const std::string_view&, char) -> std::vector<std::string_view>;
 
 // Returns the view with whitespaces removed from left and right
 auto trim(const std::string_view&) -> std::string_view;
+}  // namespace loxalone
 
-#endif  //LOXALONE_MISC_H
+#endif  // LOXALONE_MISC_H

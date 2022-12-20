@@ -12,6 +12,8 @@
 
 #include "Token.h"
 
+namespace loxalone {
+
 class RuntimeError : std::exception {
  public:
   RuntimeError(Token token, std::string_view msg)
@@ -27,5 +29,7 @@ static auto report(int line, std::string_view where,
 }
 
 static auto error(int line, std::string_view msg) { report(line, "", msg); }
+
+}
 
 #endif  // LOXALONE_ERROR_H

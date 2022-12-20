@@ -4,9 +4,11 @@
 
 #include "PrettyPrinter.h"
 
+#include <sstream>
+
 #include "Token.h"
 
-#include <sstream>
+namespace loxalone {
 
 auto PrettyPrinter::operator()(const BinaryPtr& expr) -> std::string {
   return parenthesize(expr->oper_m.lexeme, expr->left_m, expr->right_m);
@@ -63,3 +65,5 @@ auto PrettyPrinter::operator()(const CallPtr& expr) -> std::string {
   oss << ")";
   return oss.str();
 }
+
+}  // namespace loxalone

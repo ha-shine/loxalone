@@ -2,29 +2,31 @@
 // Created by Htet Aung Shine on 22/11/2022.
 //
 
+#include "Scanner.h"
+
 #include <string>
 #include <unordered_map>
 
 #include "Error.h"
-#include "Scanner.h"
 
+namespace loxalone {
 static std::unordered_map<std::string, TokenType> keywords{
-    {"and", TokenType::AND},   {"class", TokenType::CLASS}, {"else", TokenType::ELSE},     {"false", TokenType::FALSE},
-    {"for", TokenType::FOR},   {"fun", TokenType::FUN},     {"if", TokenType::IF},         {"nil", TokenType::NIL},
-    {"or", TokenType::OR},     {"print", TokenType::PRINT}, {"return", TokenType::RETURN}, {"super", TokenType::SUPER},
-    {"this", TokenType::THIS}, {"true", TokenType::TRUE},   {"var", TokenType::VAR},       {"while", TokenType::WHILE}};
+    {"and", TokenType::AND},       {"class", TokenType::CLASS},
+    {"else", TokenType::ELSE},     {"false", TokenType::FALSE},
+    {"for", TokenType::FOR},       {"fun", TokenType::FUN},
+    {"if", TokenType::IF},         {"nil", TokenType::NIL},
+    {"or", TokenType::OR},         {"print", TokenType::PRINT},
+    {"return", TokenType::RETURN}, {"super", TokenType::SUPER},
+    {"this", TokenType::THIS},     {"true", TokenType::TRUE},
+    {"var", TokenType::VAR},       {"while", TokenType::WHILE}};
 
-auto is_digit(char ch) -> bool {
-  return ch >= '0' && ch <= '9';
-}
+auto is_digit(char ch) -> bool { return ch >= '0' && ch <= '9'; }
 
 auto is_alpha(char ch) -> bool {
   return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
 }
 
-auto is_alphanumeric(char ch) -> bool {
-  return is_alpha(ch) || is_digit(ch);
-}
+auto is_alphanumeric(char ch) -> bool { return is_alpha(ch) || is_digit(ch); }
 
 auto Scanner::scan_tokens() -> std::optional<std::vector<Token>> {
   while (!is_at_end()) {
@@ -85,22 +87,20 @@ auto Scanner::scan_token() -> void {
       break;
     case '/':
       if (match('/')) {
-        while (peek() != '\n' && !is_at_end())
-          advance();
+        while (peek() != '\n' && !is_at_end()) advance();
       } else if (match('*')) {
         bool done = false;
         while (peek() != '\n' && !is_at_end() && !done) {
           char now = advance();
           if (now == '*' && peek() == '/') {
-            advance(); // consume "/"
+            advance();  // consume "/"
             done = true;
           }
         }
 
         // done = comment was well-formed, scanning is done
         // if done is false, we reached the end without closing the comment
-        if (done)
-          break;
+        if (done) break;
 
         scanner_error(line_m, "Unterminated block comment.");
       } else {
@@ -121,8 +121,8 @@ auto Scanner::scan_token() -> void {
       break;
     default:
       // TODO: This should set an parser_error flag in Lox so we won't execute
-      //       the malformed program though we can just return empty tokens_m or
-      //       result from top-level scan_tokens()?
+      //       the malformed program though we can just return empty tokens_m
+      //       or result from top-level scan_tokens()?
       if (is_digit(c)) {
         number();
       } else if (is_alpha(c)) {
@@ -133,41 +133,32 @@ auto Scanner::scan_token() -> void {
   }
 }
 
-auto Scanner::is_at_end() -> bool {
-  return current_m >= source.length();
-}
+auto Scanner::is_at_end() -> bool { return current_m >= source.length(); }
 
 // TODO: Probably not char if we want unicode
-auto Scanner::advance() -> char {
-  return source[current_m++];
-}
+auto Scanner::advance() -> char { return source[current_m++]; }
 
 auto Scanner::match(char c) -> bool {
-  if (is_at_end())
-    return false;
-  if (source[current_m] != c)
-    return false;
+  if (is_at_end()) return false;
+  if (source[current_m] != c) return false;
 
   current_m++;
   return true;
 }
 
 auto Scanner::peek() -> char {
-  if (is_at_end())
-    return '\0';
+  if (is_at_end()) return '\0';
   return source[current_m];
 }
 
 auto Scanner::peek_next() -> char {
-  if (current_m + 1 >= source.length())
-    return '\0';
+  if (current_m + 1 >= source.length()) return '\0';
   return source[current_m + 1];
 }
 
 auto Scanner::string() -> void {
   while (peek() != '"' && !is_at_end()) {
-    if (peek() == '\n')
-      line_m++;
+    if (peek() == '\n') line_m++;
     advance();
   }
 
@@ -177,31 +168,31 @@ auto Scanner::string() -> void {
   }
 
   advance();  // consume the closing "
-  std::string value{source.begin() + start_m + 1, source.begin() + current_m - 1};
+  std::string value{source.begin() + start_m + 1,
+                    source.begin() + current_m - 1};
   add_token(TokenType::STRING, std::string{source.begin() + start_m + 1,
-                                source.begin() + current_m - 1});
+                                           source.begin() + current_m - 1});
 }
 
 auto Scanner::number() -> void {
-  while (is_digit(peek()))
-    advance();
+  while (is_digit(peek())) advance();
 
   if (peek() == '.' && is_digit(peek_next())) {
     advance();  // consume the "."
 
-    while (is_digit(peek()))
-      advance();
+    while (is_digit(peek())) advance();
   }
 
-  add_token(TokenType::NUMBER, std::stod(std::string{source.begin() + start_m,
-                                          source.begin() + current_m}));
+  add_token(TokenType::NUMBER,
+            std::stod(std::string{source.begin() + start_m,
+                                  source.begin() + current_m}));
 }
 
 auto Scanner::identifier() -> void {
-  while (is_alphanumeric(peek()))
-    advance();
+  while (is_alphanumeric(peek())) advance();
 
-  std::string text = std::string{source.begin()+ start_m, source.begin()+ current_m};
+  std::string text =
+      std::string{source.begin() + start_m, source.begin() + current_m};
   auto result = keywords.find(text);
   if (result != keywords.end())
     add_token(result->second);
@@ -224,3 +215,4 @@ auto Scanner::scanner_error(int line, const std::string_view& msg) -> void {
   error(line, msg);
   well_formed_m = false;
 }
+}  // namespace loxalone

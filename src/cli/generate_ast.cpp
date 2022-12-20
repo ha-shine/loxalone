@@ -12,6 +12,8 @@
 
 static const auto USAGE = "Usage: generate_ast <output directory>\n";
 
+using namespace loxalone;
+
 struct Field {
   std::string_view type, name;
 };
@@ -95,6 +97,7 @@ auto define_ast(const std::filesystem::path& filepath,
   }
   out << '\n';
 
+  out << "namespace loxalone {\n\n";
   std::vector<Class> classes{};
   for (const auto& type : types) {
     std::vector parts = split(type, '-');
@@ -164,7 +167,8 @@ auto define_ast(const std::filesystem::path& filepath,
   for (const auto& cls : classes) {
     define_type(out, base, cls);
   }
-  // Here we will output each classes
+  out << "}\n\n"; // end of namespace
+
   out << "\n#endif\n";
 
   return 0;

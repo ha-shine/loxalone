@@ -10,6 +10,8 @@
 
 #include "Error.h"
 
+namespace loxalone {
+
 auto Environment::define(const std::string_view& key, lox_literal val) -> void {
   values[std::string{key}] = std::move(val);
 }
@@ -61,4 +63,6 @@ auto Environment::assign(const Token& token, lox_literal val) -> void {
 auto Environment::assign_at(const Token& token, int distance,
                             lox_literal&& value) -> void {
   ancestor(distance)->values[token.lexeme] = value;
+}
+
 }

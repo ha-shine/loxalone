@@ -15,6 +15,8 @@
 #include "Stmt.h"
 #include "Token.h"
 
+namespace loxalone {
+
 class Resolver {
  public:
   explicit Resolver(Interpreter& interpreter)
@@ -46,7 +48,7 @@ class Resolver {
   enum class FunctionType { NONE, FUNCTION };
 
   auto resolve(const Stmt&) -> void;
-  auto resolve_function(const FunctionPtr &stmt, FunctionType type) -> void;
+  auto resolve_function(const FunctionPtr& stmt, FunctionType type) -> void;
 
   auto resolve(const Expr&) -> void;
 
@@ -66,5 +68,6 @@ class Resolver {
 
 static_assert(ExprVisitor<Resolver, void>);
 static_assert(StmtVisitor<Resolver, void>);
+}  // namespace loxalone
 
 #endif  // LOXALONE_RESOLVER_H

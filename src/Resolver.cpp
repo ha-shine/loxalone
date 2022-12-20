@@ -6,6 +6,7 @@
 
 #include "Error.h"
 
+namespace loxalone {
 auto Resolver::operator()(const BlockPtr &stmt) -> void {
   begin_scope();
   resolve(stmt->statements_m);
@@ -58,7 +59,8 @@ auto Resolver::resolve(const std::vector<Stmt> &stmts) -> void {
 
 auto Resolver::resolve(const Stmt &stmt) -> void { visit(*this, stmt); }
 
-auto Resolver::resolve_function(const FunctionPtr &stmt, FunctionType type) -> void {
+auto Resolver::resolve_function(const FunctionPtr &stmt, FunctionType type)
+    -> void {
   FunctionType enclosing = current;
   current = type;
 
@@ -156,3 +158,4 @@ auto Resolver::operator()(const ReturnPtr &stmt) -> void {
 
   if (!expr_is_null(stmt->value_m)) resolve(stmt->value_m);
 }
+}  // namespace loxalone

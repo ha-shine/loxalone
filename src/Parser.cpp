@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 
+namespace loxalone {
 auto Parser::parse() -> std::vector<Stmt> {
   std::vector<Stmt> result{};
   try {
@@ -119,7 +120,8 @@ auto Parser::for_statement() -> Stmt {
   // added at the end
   Stmt body = Block::create(std::move(stmts));
 
-  // If the condition expression is null, use `true` literal (an infinite loop)
+  // If the condition expression is null, use `true` literal (an infinite
+  // loop)
   if (expr_is_null(condition)) condition = Literal::create(true);
 
   // De-sugar for loop into a while loop with the condition.
@@ -320,8 +322,7 @@ auto Parser::finish_call(Expr&& callee) -> Expr {
 auto Parser::primary() -> Expr {
   if (match(TokenType::TRUE)) return Literal::create(true);
   if (match(TokenType::FALSE)) return Literal::create(false);
-  if (match(TokenType::NIL))
-    return Literal::create(std::monostate{});
+  if (match(TokenType::NIL)) return Literal::create(std::monostate{});
   if (match(TokenType::NUMBER, TokenType::STRING))
     return Literal::create(lox_literal{previous().literal.value()});
   if (match(TokenType::LEFT_PAREN)) {
@@ -402,3 +403,4 @@ auto Parser::synchronize() -> void {
     }
   }
 }
+}  // namespace loxalone

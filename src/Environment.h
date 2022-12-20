@@ -11,6 +11,8 @@
 
 #include "Token.h"
 
+namespace loxalone {
+
 /*
  * Environment class represents the state of the interpreter. The variables
  * defined will be stored in this as a map.
@@ -39,5 +41,7 @@ class Environment {
   // environment will ALWAYS be alive when the current scope is active.
   Environment *enclosing;
 };
+
+}
 
 #endif  // LOXALONE_ENVIRONMENT_H

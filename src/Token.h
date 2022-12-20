@@ -6,14 +6,17 @@
 #define LOXALONE_TOKEN_H
 
 #include <fmt/format.h>
+
 #include <optional>
 #include <string>
 #include <variant>
 
+namespace loxalone {
 class LoxCallable;
 using CallablePtr = std::shared_ptr<LoxCallable>;
 
-using lox_literal = std::variant<std::string, double, bool, CallablePtr, std::monostate>;
+using lox_literal =
+    std::variant<std::string, double, bool, CallablePtr, std::monostate>;
 
 enum class TokenType {
   LEFT_PAREN,
@@ -158,26 +161,28 @@ struct Token {
         std::optional<lox_literal>&& literal, int line)
       : type{type}, lexeme{lexeme}, literal{literal}, line{line} {}
 };
+}  // namespace loxalone
 
 template <>
-struct fmt::formatter<Token> {
+struct fmt::formatter<loxalone::Token> {
+
   constexpr auto parse(fmt::format_parse_context& ctx)
       -> decltype(ctx.begin()) {
     return ctx.end();
   }
 
   template <typename FormatContext>
-  auto format(const Token& token, FormatContext& ctx) const
+  auto format(const loxalone::Token& token, FormatContext& ctx) const
       -> decltype(ctx.out()) {
     // For some reason I can't use overload visit pattern with `ctx.out` here
     switch (token.type) {
-      case TokenType::IDENTIFIER:
+      case loxalone::TokenType::IDENTIFIER:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               token.lexeme);
-      case TokenType::STRING:
+      case loxalone::TokenType::STRING:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               std::get<std::string>(token.literal.value()));
-      case TokenType::NUMBER:
+      case loxalone::TokenType::NUMBER:
         return fmt::format_to(ctx.out(), "({} '{}')", tt_to_string(token.type),
                               std::get<double>(token.literal.value()));
       default:
@@ -186,4 +191,4 @@ struct fmt::formatter<Token> {
   }
 };
 
-#endif  //LOXALONE_TOKEN_H
+#endif  // LOXALONE_TOKEN_H

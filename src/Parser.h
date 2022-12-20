@@ -7,11 +7,13 @@
 
 #include <optional>
 #include <vector>
+
 #include "Error.h"
 #include "Expr.h"
 #include "Stmt.h"
 #include "Token.h"
 
+namespace loxalone {
 class ParserError : std::exception {
  public:
   const Token& token;
@@ -30,7 +32,6 @@ class Parser {
   auto parse() -> std::vector<Stmt>;
 
  private:
-
   // Statement parsing functions
   auto declaration() -> Stmt;
   auto var_declaration() -> Stmt;
@@ -69,7 +70,8 @@ class Parser {
   auto is_at_end() -> bool;
 
   template <typename Head, typename... Tail>
-  requires std::same_as<Head, TokenType> auto match(Head, Tail...) -> bool;
+    requires std::same_as<Head, TokenType>
+  auto match(Head, Tail...) -> bool;
   auto match() -> bool;
 
   auto consume(TokenType, std::string_view&&) -> Token;
@@ -81,5 +83,6 @@ class Parser {
   const std::vector<Token>& tokens_m;
   int current_m = 0;
 };
+}  // namespace loxalone
 
-#endif  //LOXALONE_PARSER_H
+#endif  // LOXALONE_PARSER_H

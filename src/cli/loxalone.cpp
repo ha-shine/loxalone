@@ -12,6 +12,8 @@
 
 const auto USAGE = "Usage: loxalone [script]";
 
+using namespace loxalone;
+
 // Probably should return result rather than boolean
 // And also each line is run once here, the interpreter probably needs to
 // maintain internal state (e.g. variables set, classes defined, etc.)

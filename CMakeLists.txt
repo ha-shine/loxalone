@@ -10,7 +10,6 @@ set(sources
         src/Scanner.h
         src/Token.h
         src/Error.h
-        src/Expr.cpp
         src/Stmt.h
         src/Expr.h
         src/Parser.cpp

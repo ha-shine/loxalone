@@ -9,6 +9,8 @@
 #include "Expr.h"
 #include "Token.h"
 
+namespace loxalone {
+
 class Block;
 class Expression;
 class Function;
@@ -194,5 +196,7 @@ class Var {
 
   static auto empty() -> Stmt { return std::unique_ptr<Var>(nullptr); }
 };
+
+}  // namespace loxalone
 
 #endif

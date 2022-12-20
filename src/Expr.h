@@ -8,6 +8,8 @@
 
 #include "Token.h"
 
+namespace loxalone {
+
 class Assign;
 class Binary;
 class Call;
@@ -188,5 +190,7 @@ class Variable {
 
   static auto empty() -> Expr { return std::unique_ptr<Variable>(nullptr); }
 };
+
+}  // namespace loxalone
 
 #endif

@@ -5,12 +5,13 @@
 #ifndef LOXALONE_SCANNER_H
 #define LOXALONE_SCANNER_H
 
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 #include "Token.h"
 
+namespace loxalone {
 class Scanner {
  public:
   explicit Scanner(const std::string_view& source) : source{source}, tokens{} {}
@@ -42,5 +43,6 @@ class Scanner {
   int line_m = 1;
   bool well_formed_m = true;
 };
+}  // namespace loxalone
 
-#endif  //LOXALONE_SCANNER_H
+#endif  // LOXALONE_SCANNER_H

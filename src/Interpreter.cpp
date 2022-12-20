@@ -10,6 +10,8 @@
 #include "LiteralFormatter.h"
 #include "LoxCallable.h"
 
+namespace loxalone {
+
 Interpreter::Interpreter() : globals{}, env{&globals}, locals{} {
   globals.define("clock", std::make_shared<NativeCallable>(
                               "clock", 0, [](const auto& args) -> lox_literal {
@@ -129,7 +131,7 @@ auto Interpreter::operator()(const AssignPtr& expr) -> lox_literal {
   if (!expr) return std::monostate{};
 
   lox_literal value = visit(*this, expr->value_m);
-  void *ptr = static_cast<void*>(expr.get());
+  void* ptr = static_cast<void*>(expr.get());
   auto find = locals.find(ptr);
   if (find != locals.end()) {
     env->assign_at(expr->name_m, find->second, lox_literal{value});
@@ -329,3 +331,4 @@ auto Interpreter::check_are_numbers(const Token& oper, const lox_literal& left,
       !std::holds_alternative<double>(right))
     throw RuntimeError{oper, "Operands must be numbers."};
 }
+}  // namespace loxalone
