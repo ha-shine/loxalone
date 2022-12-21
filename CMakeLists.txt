@@ -15,9 +15,18 @@ set(sources
         src/interpreter/Parser.cpp
         src/interpreter/Parser.h
         src/interpreter/Interpreter.h
-        src/interpreter/Interpreter.cpp src/interpreter/LoxCallable.cpp src/interpreter/LoxCallable.h)
+        src/interpreter/Interpreter.cpp
+        src/interpreter/LoxCallable.cpp
+        src/interpreter/LoxCallable.h
+        src/interpreter/Environment.cpp
+        src/interpreter/Environment.h
+        src/interpreter/LiteralFormatter.h
+        src/interpreter/Resolver.cpp
+        src/interpreter/Resolver.h
+        src/interpreter/LoxClass.cpp
+        src/interpreter/LoxClass.h src/interpreter/LoxInstance.cpp src/interpreter/LoxInstance.h)
 
-add_executable(loxalone src/cli/loxalone.cpp src/interpreter/PrettyPrinter.cpp src/interpreter/PrettyPrinter.h ${sources} src/interpreter/Environment.cpp src/interpreter/Environment.h src/interpreter/LiteralFormatter.h src/interpreter/Resolver.cpp src/interpreter/Resolver.h)
+add_executable(loxalone src/cli/loxalone.cpp ${sources})
 target_link_libraries(loxalone PRIVATE fmt::fmt)
 
 add_executable(pretty_print src/cli/pretty_print.cpp src/interpreter/PrettyPrinter.cpp src/interpreter/PrettyPrinter.h ${sources})

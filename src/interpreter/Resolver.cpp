@@ -158,4 +158,10 @@ auto Resolver::operator()(const ReturnPtr &stmt) -> void {
 
   if (!expr_is_null(stmt->value_m)) resolve(stmt->value_m);
 }
+
+auto Resolver::operator()(const ClassPtr &stmt) -> void {
+  declare(stmt->name_m);
+  define(stmt->name_m);
+}
+
 }  // namespace loxalone

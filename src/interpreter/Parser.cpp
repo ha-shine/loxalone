@@ -5,6 +5,7 @@
 #include "Parser.h"
 
 namespace loxalone {
+
 auto Parser::parse() -> std::vector<Stmt> {
   std::vector<Stmt> result{};
   try {
@@ -21,6 +22,7 @@ auto Parser::parse() -> std::vector<Stmt> {
 
 auto Parser::declaration() -> Stmt {
   try {
+    if (match(TokenType::CLASS)) return class_declaration();
     if (match(TokenType::FUN)) return function("function");
     if (match(TokenType::VAR)) return var_declaration();
 
@@ -29,6 +31,19 @@ auto Parser::declaration() -> Stmt {
     synchronize();
     return Var::empty();
   }
+}
+
+auto Parser::class_declaration() -> Stmt {
+  Token name = consume(TokenType::IDENTIFIER, "Expect class name.");
+  consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
+
+  std::vector<FunctionPtr> methods{};
+  while (!check(TokenType::RIGHT_BRACE) && !is_at_end()) {
+    methods.emplace_back(std::get<FunctionPtr>(function("method")));
+  }
+
+  consume(TokenType::RIGHT_BRACE, "Expect '}' after class body");
+  return Class::create(std::move(name), std::move(methods));
 }
 
 auto Parser::var_declaration() -> Stmt {
@@ -403,4 +418,5 @@ auto Parser::synchronize() -> void {
     }
   }
 }
+
 }  // namespace loxalone

@@ -9,6 +9,7 @@
 
 #include "LiteralFormatter.h"
 #include "LoxCallable.h"
+#include "LoxClass.h"
 
 namespace loxalone {
 
@@ -165,11 +166,11 @@ auto Interpreter::operator()(const CallPtr& expr) -> lox_literal {
     args.emplace_back(visit(*this, arg));
   }
 
-  if (!std::holds_alternative<CallablePtr>(callee)) {
+  if (!std::holds_alternative<LoxCallablePtr>(callee)) {
     throw RuntimeError{expr->paren_m, "Can only call functions and classes"};
   }
 
-  auto& ptr = std::get<CallablePtr>(callee);
+  auto& ptr = std::get<LoxCallablePtr>(callee);
   if (args.size() != ptr->arity()) {
     throw RuntimeError{expr->paren_m,
                        fmt::format("Expected {} arguments but got {}.",
@@ -285,6 +286,12 @@ auto Interpreter::operator()(const ReturnPtr& stmt) -> void {
   if (!std::holds_alternative<std::monostate>(value)) throw ReturnObject{value};
 }
 
+auto Interpreter::operator()(const ClassPtr& stmt) -> void {
+  env->define(stmt->name_m.lexeme, std::monostate{});
+  auto ptr = std::make_unique<LoxClass>(stmt->name_m.lexeme);
+  env->assign(stmt->name_m, std::move(ptr));
+}
+
 auto Interpreter::interpret(const std::vector<Stmt>& stmts) -> bool {
   try {
     for (const auto& stmt : stmts) {
@@ -311,7 +318,9 @@ auto Interpreter::execute_block(const std::vector<Stmt>& stmts,
   }
 }
 
-auto Interpreter::get_globals() const -> const Environment& { return this->globals; }
+auto Interpreter::get_globals() const -> const Environment& {
+  return this->globals;
+}
 
 auto Interpreter::check_is_number(const Token& oper, const lox_literal& operand)
     -> void {
@@ -331,4 +340,5 @@ auto Interpreter::check_are_numbers(const Token& oper, const lox_literal& left,
       !std::holds_alternative<double>(right))
     throw RuntimeError{oper, "Operands must be numbers."};
 }
+
 }  // namespace loxalone

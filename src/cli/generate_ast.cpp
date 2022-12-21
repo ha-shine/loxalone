@@ -198,6 +198,7 @@ int main(int argc, char** argv) {
               "Block      - std::vector<Stmt> statements",
               "Expression - Expr expression",
               "Function   - Token name, std::vector<Token> params, std::vector<Stmt> body",
+              "Class      - Token name, std::vector<FunctionPtr> methods",
               "If         - Expr expression, Token token, Stmt then_branch, Stmt else_branch",
               "While      - Expr condition, Stmt body, Token token",
               "Print      - Expr expression",

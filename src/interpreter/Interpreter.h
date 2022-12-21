@@ -22,24 +22,25 @@ class Interpreter {
   Interpreter();
 
   // Expression visitor
-  auto operator()(const BinaryPtr &) -> lox_literal;
-  auto operator()(const GroupingPtr &) -> lox_literal;
-  auto operator()(const LiteralPtr &) -> lox_literal;
-  auto operator()(const UnaryPtr &) -> lox_literal;
-  auto operator()(const VariablePtr &) -> lox_literal;
-  auto operator()(const AssignPtr &) -> lox_literal;
-  auto operator()(const LogicalPtr &) -> lox_literal;
-  auto operator()(const CallPtr &) -> lox_literal;
+  auto operator()(const BinaryPtr &expr) -> lox_literal;
+  auto operator()(const GroupingPtr &expr) -> lox_literal;
+  auto operator()(const LiteralPtr &expr) -> lox_literal;
+  auto operator()(const UnaryPtr &expr) -> lox_literal;
+  auto operator()(const VariablePtr &expr) -> lox_literal;
+  auto operator()(const AssignPtr &expr) -> lox_literal;
+  auto operator()(const LogicalPtr &expr) -> lox_literal;
+  auto operator()(const CallPtr &expr) -> lox_literal;
 
   // Statement visitors
-  auto operator()(const BlockPtr &) -> void;
-  auto operator()(const ExpressionPtr &) -> void;
-  auto operator()(const FunctionPtr &) -> void;
-  auto operator()(const PrintPtr &) -> void;
-  auto operator()(const VarPtr &) -> void;
-  auto operator()(const IfPtr &) -> void;
-  auto operator()(const WhilePtr &) -> void;
-  auto operator()(const ReturnPtr &) -> void;
+  auto operator()(const BlockPtr &stmt) -> void;
+  auto operator()(const ExpressionPtr &stmt) -> void;
+  auto operator()(const FunctionPtr &stmt) -> void;
+  auto operator()(const PrintPtr &stmt) -> void;
+  auto operator()(const VarPtr &stmt) -> void;
+  auto operator()(const IfPtr &stmt) -> void;
+  auto operator()(const WhilePtr &stmt) -> void;
+  auto operator()(const ReturnPtr &stmt) -> void;
+  auto operator()(const ClassPtr &stmt) -> void;
 
   // Entry point for interpreter, returns true if it's successful
   // or false if there's a runtime error

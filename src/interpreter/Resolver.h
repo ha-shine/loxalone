@@ -19,49 +19,50 @@ namespace loxalone {
 
 class Resolver {
  public:
-  explicit Resolver(Interpreter& interpreter)
+  explicit Resolver(Interpreter &interpreter)
       : interpreter{interpreter}, scopes{}, current{FunctionType::NONE} {}
 
-  auto resolve(const std::vector<Stmt>&) -> void;
+  auto resolve(const std::vector<Stmt> &) -> void;
 
   // Expression visitor
-  auto operator()(const BinaryPtr&) -> void;
-  auto operator()(const GroupingPtr&) -> void;
-  auto operator()(const LiteralPtr&) -> void;
-  auto operator()(const UnaryPtr&) -> void;
-  auto operator()(const VariablePtr&) -> void;
-  auto operator()(const AssignPtr&) -> void;
-  auto operator()(const LogicalPtr&) -> void;
-  auto operator()(const CallPtr&) -> void;
+  auto operator()(const BinaryPtr &expr) -> void;
+  auto operator()(const GroupingPtr &expr) -> void;
+  auto operator()(const LiteralPtr &expr) -> void;
+  auto operator()(const UnaryPtr &expr) -> void;
+  auto operator()(const VariablePtr &expr) -> void;
+  auto operator()(const AssignPtr &expr) -> void;
+  auto operator()(const LogicalPtr &expr) -> void;
+  auto operator()(const CallPtr &expr) -> void;
 
   // Statement visitors
-  auto operator()(const BlockPtr&) -> void;
-  auto operator()(const ExpressionPtr&) -> void;
-  auto operator()(const FunctionPtr&) -> void;
-  auto operator()(const PrintPtr&) -> void;
-  auto operator()(const VarPtr&) -> void;
-  auto operator()(const IfPtr&) -> void;
-  auto operator()(const WhilePtr&) -> void;
-  auto operator()(const ReturnPtr&) -> void;
+  auto operator()(const BlockPtr &stmt) -> void;
+  auto operator()(const ExpressionPtr &stmt) -> void;
+  auto operator()(const FunctionPtr &stmt) -> void;
+  auto operator()(const PrintPtr &stmt) -> void;
+  auto operator()(const VarPtr &stmt) -> void;
+  auto operator()(const IfPtr &stmt) -> void;
+  auto operator()(const WhilePtr &stmt) -> void;
+  auto operator()(const ReturnPtr &stmt) -> void;
+  auto operator()(const ClassPtr &stmt) -> void;
 
  private:
   enum class FunctionType { NONE, FUNCTION };
 
-  auto resolve(const Stmt&) -> void;
-  auto resolve_function(const FunctionPtr& stmt, FunctionType type) -> void;
+  auto resolve(const Stmt &) -> void;
+  auto resolve_function(const FunctionPtr &stmt, FunctionType type) -> void;
 
-  auto resolve(const Expr&) -> void;
+  auto resolve(const Expr &) -> void;
 
   template <IsExpr T>
-  auto resolve_local(const T&, const Token&) -> void;
+  auto resolve_local(const T &, const Token &) -> void;
 
-  auto declare(const Token&) -> void;
-  auto define(const Token&) -> void;
+  auto declare(const Token &) -> void;
+  auto define(const Token &) -> void;
 
   auto begin_scope() -> void;
   auto end_scope() -> void;
 
-  Interpreter& interpreter;
+  Interpreter &interpreter;
   std::vector<std::unordered_map<std::string, bool>> scopes;
   FunctionType current;
 };

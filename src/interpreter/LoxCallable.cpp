@@ -28,7 +28,7 @@ auto LoxFunction::execute(Interpreter& interpreter,
   return std::monostate{};
 }
 
-auto LoxFunction::name() -> std::string_view {
+auto LoxFunction::name() const -> std::string_view {
   return declaration->name_m.lexeme;
 }
 

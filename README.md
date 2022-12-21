@@ -47,9 +47,11 @@ Terminals are in capital letters.
 ```
 
 - program           -> declaration* EOF_ ;
-- declaration       -> fun_decl 
+- declaration       -> class_decl
+                     | fun_decl 
                      | var_decl
                      | statement ;
+- class_decl        -> "class" IDENTIFIER "{" function* "}" ;
 - fun_decl          -> "fun" function ;
 - function          -> IDENTIFIER "(" parameters? ")" block ;
 - parameters        -> IDENTIFIER ( "," IDENTIFIER )* ;
@@ -102,3 +104,5 @@ Terminals are in capital letters.
 - Extend resolver to report an error if a local variable is never used
 - Associate a unique index for each local variable declared in a scope and store that together with the depth.
   When resolving from interpreter, use that to quickly access the variable. This will be faster than using names.
+- Rethink about using unique_ptr for statements and expressions
+- Replace shared_ptr with local_shared_ptr from boost as thread safety is not needed

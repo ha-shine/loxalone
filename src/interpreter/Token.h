@@ -12,11 +12,15 @@
 #include <variant>
 
 namespace loxalone {
-class LoxCallable;
-using CallablePtr = std::shared_ptr<LoxCallable>;
 
-using lox_literal =
-    std::variant<std::string, double, bool, CallablePtr, std::monostate>;
+class LoxCallable;
+using LoxCallablePtr = std::shared_ptr<LoxCallable>;
+
+class LoxInstance;
+using LoxInstancePtr = std::shared_ptr<LoxInstance>;
+
+using lox_literal = std::variant<std::string, double, bool, LoxCallablePtr,
+                                 LoxInstancePtr, std::monostate>;
 
 enum class TokenType {
   LEFT_PAREN,
@@ -165,7 +169,6 @@ struct Token {
 
 template <>
 struct fmt::formatter<loxalone::Token> {
-
   constexpr auto parse(fmt::format_parse_context& ctx)
       -> decltype(ctx.begin()) {
     return ctx.end();
